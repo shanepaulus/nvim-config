@@ -1,10 +1,11 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "master",  -- main branch is a rewrite requiring Neovim 0.12+; master supports 0.11
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
+      { "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
     },
     opts = {
       ensure_installed = {
