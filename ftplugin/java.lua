@@ -200,13 +200,16 @@ local config = {
     map("<leader>jc", jdtls.extract_constant, "Extract constant")
 
     -- Test running (requires vscode-java-test bundle)
+    -- test_nearest_method runs with DAP attached (noDebug=false by default)
+    -- pass noDebug=true for a plain run without the debugger
     if #bundles > 0 then
-      -- IntelliJ: Shift+F10 → Run (nearest test when in a test class)
-      map("<S-F10>", require("jdtls.dap").test_nearest_method, "Run test method (Shift+F10)")
-      -- IntelliJ: Shift+F9 → Debug (nearest test)
-      map("<S-F9>",  require("jdtls.dap").debug_nearest_method, "Debug test method (Shift+F9)")
-      map("<leader>jt", require("jdtls.dap").test_nearest_method, "Test nearest method")
-      map("<leader>jT", require("jdtls.dap").test_class,          "Test class")
+      local dap = require("jdtls.dap")
+      -- IntelliJ: Shift+F10 → Run test (no debugger)
+      map("<S-F10>", function() dap.test_nearest_method({ config_overrides = { noDebug = true } }) end,  "Run test method (Shift+F10)")
+      -- IntelliJ: Shift+F9 → Debug test (with debugger attached)
+      map("<S-F9>",  function() dap.test_nearest_method() end, "Debug test method (Shift+F9)")
+      map("<leader>jt", function() dap.test_nearest_method() end,  "Test nearest method")
+      map("<leader>jT", function() dap.test_class() end,           "Test class")
     end
 
     -- Update project config when build files change
