@@ -111,7 +111,8 @@ return {
     keys = {
       { "<C-Tab>",   "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer (Ctrl+Tab)" },
       { "<C-S-Tab>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer (Ctrl+Shift+Tab)" },
-      { "<C-F4>",    "<cmd>bdelete<cr>",             desc = "Close buffer (Ctrl+F4)" },
+      { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
+      { "<C-q>",  "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+Q)" },
     },
     opts = {
       options = {
