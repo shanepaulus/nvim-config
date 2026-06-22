@@ -11,7 +11,10 @@ return {
       },
     },
     keys = {
-      -- IntelliJ: Ctrl+Shift+N → Find File
+      -- Find file (Ctrl+P — Ctrl+Shift+N is intercepted by the terminal)
+      { "<C-p>", "<cmd>Telescope find_files<cr>",
+        mode = { "n", "i" }, desc = "Find file (Ctrl+P)" },
+      -- IntelliJ: Ctrl+Shift+N → Find File (kept for terminals that pass it through)
       { "<C-S-n>", "<cmd>Telescope find_files<cr>",
         mode = { "n", "i" }, desc = "Find file (Ctrl+Shift+N)" },
       -- IntelliJ: Ctrl+Shift+F → Search in project
