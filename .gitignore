@@ -1,0 +1,7 @@
+# Neovim session files
+*.swp
+*.swo
+Session.vim
+
+# Cache files
+.cache/
