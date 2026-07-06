@@ -108,12 +108,19 @@ return {
     "akinsho/bufferline.nvim",
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    keys = {
-      { "<C-Tab>",   "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer (Ctrl+Tab)" },
-      { "<C-S-Tab>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer (Ctrl+Shift+Tab)" },
-      { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
-      { "<C-q>",  "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+Q)" },
-    },
+    keys = (function()
+      local keys = {
+        { "<C-Tab>",   "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer (Ctrl+Tab)" },
+        { "<C-S-Tab>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer (Ctrl+Shift+Tab)" },
+        { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
+        { "<C-q>",  "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+Q)" },
+      }
+      if require("config.util").is_mac() then
+        -- mac IntelliJ: ⌘W → Close tab
+        table.insert(keys, { "<D-w>", "<cmd>bdelete<cr>", desc = "Close buffer (⌘W)" })
+      end
+      return keys
+    end)(),
     opts = {
       options = {
         mode = "buffers",

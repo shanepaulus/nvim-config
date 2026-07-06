@@ -3,17 +3,20 @@ return {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
     cmd   = { "ConformInfo" },
-    keys = {
-      -- IntelliJ: Ctrl+Alt+L → Reformat code
-      {
-        "<C-A-l>",
-        function()
-          require("conform").format({ async = true, lsp_fallback = true })
-        end,
-        mode = { "n", "i", "v" },
-        desc = "Format file (Ctrl+Alt+L)",
-      },
-    },
+    keys = (function()
+      local format = function()
+        require("conform").format({ async = true, lsp_fallback = true })
+      end
+      local keys = {
+        -- IntelliJ: Ctrl+Alt+L → Reformat code
+        { "<C-A-l>", format, mode = { "n", "i", "v" }, desc = "Format file (Ctrl+Alt+L)" },
+      }
+      if require("config.util").is_mac() then
+        -- mac IntelliJ: ⌥⌘L → Reformat code
+        table.insert(keys, { "<D-A-l>", format, mode = { "n", "i", "v" }, desc = "Format file (⌥⌘L)" })
+      end
+      return keys
+    end)(),
     opts = {
       formatters_by_ft = {
         java       = { "google-java-format" },

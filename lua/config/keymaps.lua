@@ -53,26 +53,30 @@ map({ "n", "i" }, "<C-A-w>", "<cmd>set list!<cr>", "Toggle whitespace (Ctrl+Alt+
 
 -- Toggle comment (IntelliJ Ctrl+/)
 -- Works with Comment.nvim loaded in plugins/editor.lua
-map("n", "<C-/>", function()
+local comment_n = function()
   require("Comment.api").toggle.linewise.current()
-end, "Toggle comment (Ctrl+/)")
-map("i", "<C-/>", function()
+end
+local comment_i = function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "n", false)
   require("Comment.api").toggle.linewise.current()
-end, "Toggle comment (Ctrl+/)")
-map("v", "<C-/>", function()
+end
+local comment_v = function()
   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
   vim.api.nvim_feedkeys(esc, "nx", false)
   require("Comment.api").toggle.linewise(vim.fn.visualmode())
-end, "Toggle comment (Ctrl+/)")
+end
+map("n", "<C-/>", comment_n, "Toggle comment (Ctrl+/)")
+map("i", "<C-/>", comment_i, "Toggle comment (Ctrl+/)")
+map("v", "<C-/>", comment_v, "Toggle comment (Ctrl+/)")
 
 -- Go to line (IntelliJ Ctrl+G)
-map({ "n", "i" }, "<C-g>", function()
+local goto_line = function()
   local line = vim.fn.input("Go to line: ")
   if line ~= "" then
     vim.cmd(":" .. line)
   end
-end, "Go to line (Ctrl+G)")
+end
+map({ "n", "i" }, "<C-g>", goto_line, "Go to line (Ctrl+G)")
 
 -- Jump back / forward (IntelliJ Alt+Left / Alt+Right)
 map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
@@ -103,3 +107,29 @@ map("v", ">", ">gv", "Indent right")
 -- Better up/down on wrapped lines (mostly relevant for markdown/text)
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", "Down", { expr = true })
 map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", "Up",   { expr = true })
+
+-- ============================================================
+-- macOS: Cmd (⌘) maps mirroring the stock mac IntelliJ keymap,
+-- on top of the Ctrl maps above (kept as fallback).
+-- Needs a terminal that forwards ⌘ chords via the kitty
+-- keyboard protocol — see the "macOS (Ghostty)" README section.
+-- ============================================================
+if require("config.util").is_mac() then
+  map({ "n", "i", "v" }, "<D-s>", "<cmd>w<cr><esc>", "Save (⌘S)")
+  map({ "n", "i" }, "<D-z>",   "<cmd>undo<cr>", "Undo (⌘Z)")
+  map({ "n", "i" }, "<D-S-z>", "<cmd>redo<cr>", "Redo (⇧⌘Z)")
+  map({ "n", "i" }, "<D-a>", "ggVG", "Select all (⌘A)")
+  map("v", "<D-c>", '"+y', "Copy to clipboard (⌘C)")
+  map({ "n", "i", "v" }, "<D-v>", '"+p', "Paste from clipboard (⌘V)")
+  map("n", "<D-d>", "yyp",       "Duplicate line (⌘D)")
+  map("i", "<D-d>", "<esc>yypi", "Duplicate line (⌘D)")
+  map("v", "<D-d>", "y`>p",      "Duplicate selection (⌘D)")
+  map({ "n", "i" }, "<D-BS>", "<cmd>d<cr>", "Delete line (⌘⌫)")
+  map("n", "<D-/>", comment_n, "Toggle comment (⌘/)")
+  map("i", "<D-/>", comment_i, "Toggle comment (⌘/)")
+  map("v", "<D-/>", comment_v, "Toggle comment (⌘/)")
+  map({ "n", "i" }, "<D-l>", goto_line, "Go to line (⌘L)")
+  map("n", "<D-[>", "<C-o>", "Jump back (⌘[)")
+  map("n", "<D-]>", "<C-i>", "Jump forward (⌘])")
+  map({ "n", "i" }, "<D-w>", "<cmd>bdelete<cr>", "Close buffer (⌘W)")
+end

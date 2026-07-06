@@ -7,28 +7,31 @@ return {
       "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
-    -- Alt+1: focus sidebar if open, close if already focused (IntelliJ Alt+1 behaviour)
-    keys = {
-      {
-        "<A-1>",
-        function()
-          local state = require("neo-tree.sources.manager").get_state("filesystem")
-          local wins = vim.api.nvim_list_wins()
-          for _, w in ipairs(wins) do
-            if vim.api.nvim_win_get_buf(w) == (state.bufnr or -1) then
-              if vim.api.nvim_get_current_win() == w then
-                vim.cmd("Neotree close")
-              else
-                vim.api.nvim_set_current_win(w)
-              end
-              return
+    -- Alt+1 (⌘1 on mac): focus sidebar if open, close if already focused (IntelliJ behaviour)
+    keys = (function()
+      local focus_or_close = function()
+        local state = require("neo-tree.sources.manager").get_state("filesystem")
+        local wins = vim.api.nvim_list_wins()
+        for _, w in ipairs(wins) do
+          if vim.api.nvim_win_get_buf(w) == (state.bufnr or -1) then
+            if vim.api.nvim_get_current_win() == w then
+              vim.cmd("Neotree close")
+            else
+              vim.api.nvim_set_current_win(w)
             end
+            return
           end
-          vim.cmd("Neotree focus")
-        end,
-        desc = "Focus/toggle file explorer (Alt+1)",
-      },
-    },
+        end
+        vim.cmd("Neotree focus")
+      end
+      local keys = {
+        { "<A-1>", focus_or_close, desc = "Focus/toggle file explorer (Alt+1)" },
+      }
+      if require("config.util").is_mac() then
+        table.insert(keys, { "<D-1>", focus_or_close, desc = "Focus/toggle file explorer (⌘1)" })
+      end
+      return keys
+    end)(),
     opts = {
       close_if_last_window = false,
       popup_border_style = "rounded",

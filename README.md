@@ -119,7 +119,7 @@ cd ~/.config/nvim && git pull
 | `Ctrl+A` | Select all |
 | `Ctrl+C` (visual) | Copy to clipboard |
 | `Ctrl+V` | Paste from clipboard |
-| `Ctrl+Q` | Visual block mode |
+| `Ctrl+Q` | Close buffer |
 | `Alt+J / Alt+K` | Move line down / up |
 | `Ctrl+Alt+W` | Toggle whitespace visibility |
 | `Shift+Alt+Enter/Up/Down/Left/Right` | Cycle alternatives (true↔false, &&↔\|\|, etc.) |
@@ -166,6 +166,50 @@ cd ~/.config/nvim && git pull
 | `R` | Refresh |
 | `I` | Toggle gitignored files |
 | `?` | Show all keys |
+
+### macOS (Ghostty)
+
+On macOS the config additionally registers Cmd-based shortcuts mirroring the **stock macOS IntelliJ keymap**, alongside all the Ctrl/Alt bindings above. Neovim ≥ 0.10 receives ⌘ chords from Ghostty via the kitty keyboard protocol as the `D-` (super) modifier.
+
+| Key | Action |
+|-----|--------|
+| `⌘S` | Save |
+| `⌘Z` / `⇧⌘Z` | Undo / Redo |
+| `⌘A` | Select all |
+| `⌘C` (visual) / `⌘V` | Copy / paste clipboard |
+| `⌘D` | Duplicate line |
+| `⌘⌫` | Delete line |
+| `⌘/` | Toggle comment |
+| `⌘L` | Go to line number |
+| `⌘[` / `⌘]` | Jump back / forward |
+| `⌘W` | Close buffer |
+| `⌘B` / `⌥⌘B` | Go to definition / implementation |
+| `⌘Y` | Hover documentation (quick definition) |
+| `⇧⌘O` | Find file by name |
+| `⌘E` | Recent files |
+| `⇧⌘F` | Live grep (search in files) |
+| `⌥⌘O` | Workspace symbols |
+| `⌥⌘L` | Format file |
+| `⌘1` | Toggle file explorer |
+| `⌘F2` | Debug: stop |
+
+Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `Alt+J/K`, `Alt+1`, `Alt+4`, `Alt+Enter`, `Alt+F7`), and Ghostty's own ⌘ bindings must be released for the chords Neovim needs:
+
+```
+macos-option-as-alt = true
+
+# Release Ghostty defaults that collide with the IntelliJ-style maps
+keybind = super+d=unbind                 # new split
+keybind = super+w=unbind                 # close surface
+keybind = super+a=unbind                 # select all
+keybind = super+left_bracket=unbind      # previous split
+keybind = super+right_bracket=unbind     # next split
+keybind = super+physical:one=unbind      # goto tab 1 (frees ⌘1)
+```
+
+Check the exact defaults on your Ghostty version with `ghostty +list-keybinds --default` — any ⌘ chord left unbound passes through to Neovim automatically. `⌘C`/`⌘V` need no unbinding: Ghostty's copy only fires when a terminal selection exists, and its paste works in Neovim via bracketed paste.
+
+Testing note: the Cmd maps are gated on `has("mac")`; set `NVIM_MAC_KEYS=1` to force-register them on Linux (see `lua/config/util.lua`).
 
 ## Troubleshooting
 

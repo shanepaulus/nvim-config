@@ -127,6 +127,15 @@ return {
         vim.keymap.set("i", "<C-S-p>", vim.lsp.buf.signature_help,
           { buffer = bufnr, desc = "LSP: Signature help" })
 
+        -- mac IntelliJ equivalents (stock macOS keymap); ⌥F7 find usages matches already
+        if require("config.util").is_mac() then
+          map("<D-b>",   vim.lsp.buf.definition,     "Go to definition (⌘B)")
+          map("<D-b>",   vim.lsp.buf.definition,     "Go to definition (⌘B)", "i")
+          map("<D-A-b>", vim.lsp.buf.implementation, "Go to implementation (⌥⌘B)")
+          map("<D-A-b>", vim.lsp.buf.implementation, "Go to implementation (⌥⌘B)", "i")
+          map("<D-y>",   vim.lsp.buf.hover,          "Quick definition (⌘Y)")
+        end
+
         vim.api.nvim_create_autocmd("CursorHold", {
           buffer = bufnr,
           callback = function()

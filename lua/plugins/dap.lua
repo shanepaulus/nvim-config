@@ -59,7 +59,8 @@ return {
         opts = { commented = true },
       },
     },
-    keys = {
+    keys = (function()
+      local keys = {
       -- IntelliJ debug keybindings
       { "<F5>",   function() require("dap").continue() end,          desc = "Debug: Continue (F5)" },
       { "<F8>",   function() require("dap").step_over() end,         desc = "Debug: Step Over (F8)" },
@@ -88,7 +89,13 @@ return {
       },
       { "<leader>dr", function() require("dap").repl.open() end,   desc = "Debug: REPL" },
       { "<leader>du", function() require("dapui").toggle() end,     desc = "Debug: Toggle UI" },
-    },
+      }
+      if require("config.util").is_mac() then
+        -- mac IntelliJ: ⌘F2 → Stop
+        table.insert(keys, { "<D-F2>", function() require("dap").terminate() end, desc = "Debug: Stop (⌘F2)" })
+      end
+      return keys
+    end)(),
     config = function()
       local dap = require("dap")
 
