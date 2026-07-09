@@ -14,6 +14,7 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - Auto-formatting via conform.nvim
 - Git integration via gitsigns + lazygit
 - Completion via nvim-cmp + LuaSnip
+- Claude Code agent mode via claudecode.nvim (live diffs, selection context, `<leader>c*`)
 
 ## Requirements
 
@@ -41,6 +42,7 @@ These need to be on your `PATH`:
 | `fzf` | fuzzy matching | `brew install fzf` / `apt install fzf` |
 | `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
+| `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
 
 ### Java (if you work with Java projects)
@@ -266,6 +268,7 @@ Vue LSP (`volar`) is commented out because the lspconfig server name can vary by
     │   └── options.lua       # Editor options
     └── plugins/
         ├── aerial.lua        # Code structure outline (Ctrl+F12 fallback)
+        ├── claude.lua        # claudecode.nvim: Claude Code agent mode (<leader>c*)
         ├── completion.lua    # nvim-cmp + LuaSnip
         ├── dap.lua           # Debug adapter + UI
         ├── editor.lua        # autopairs, surround, multi-cursor, comments
