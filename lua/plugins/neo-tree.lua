@@ -24,11 +24,13 @@ return {
         end
         vim.cmd("Neotree focus")
       end
+      -- mode = "t" so this still works with focus inside a terminal buffer
+      -- (toggleterm, Maven/Gradle floats, or the Claude Code panel)
       local keys = {
-        { "<A-1>", focus_or_close, desc = "Focus/toggle file explorer (Alt+1)" },
+        { "<A-1>", focus_or_close, mode = { "n", "t" }, desc = "Focus/toggle file explorer (Alt+1)" },
       }
       if require("config.util").is_mac() then
-        table.insert(keys, { "<D-1>", focus_or_close, desc = "Focus/toggle file explorer (⌘1)" })
+        table.insert(keys, { "<D-1>", focus_or_close, mode = { "n", "t" }, desc = "Focus/toggle file explorer (⌘1)" })
       end
       return keys
     end)(),

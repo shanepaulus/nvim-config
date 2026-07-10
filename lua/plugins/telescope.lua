@@ -1,16 +1,18 @@
+-- mode "t" included on file-navigation keys so they still work with focus
+-- inside a terminal buffer (toggleterm, Maven/Gradle floats, Claude Code panel)
 local keys = {
   -- Find file (Ctrl+P — Ctrl+Shift+N is intercepted by the terminal)
   { "<C-p>", "<cmd>Telescope find_files<cr>",
-    mode = { "n", "i" }, desc = "Find file (Ctrl+P)" },
+    mode = { "n", "i", "t" }, desc = "Find file (Ctrl+P)" },
   -- IntelliJ: Ctrl+Shift+N → Find File (kept for terminals that pass it through)
   { "<C-S-n>", "<cmd>Telescope find_files<cr>",
-    mode = { "n", "i" }, desc = "Find file (Ctrl+Shift+N)" },
+    mode = { "n", "i", "t" }, desc = "Find file (Ctrl+Shift+N)" },
   -- IntelliJ: Ctrl+Shift+F → Search in project
   { "<C-S-f>", "<cmd>Telescope live_grep<cr>",
-    mode = { "n", "i" }, desc = "Search in project (Ctrl+Shift+F)" },
+    mode = { "n", "i", "t" }, desc = "Search in project (Ctrl+Shift+F)" },
   -- IntelliJ: Ctrl+E → Recent files
   { "<C-e>", "<cmd>Telescope oldfiles<cr>",
-    mode = { "n", "i" }, desc = "Recent files (Ctrl+E)" },
+    mode = { "n", "i", "t" }, desc = "Recent files (Ctrl+E)" },
   -- IntelliJ: Ctrl+Shift+O → Go to symbol (workspace)
   { "<C-S-o>", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
     mode = { "n", "i" }, desc = "Go to symbol (Ctrl+Shift+O)" },
@@ -34,13 +36,13 @@ if require("config.util").is_mac() then
   vim.list_extend(keys, {
     -- mac IntelliJ: ⇧⌘O → Go to File
     { "<D-S-o>", "<cmd>Telescope find_files<cr>",
-      mode = { "n", "i" }, desc = "Find file (⇧⌘O)" },
+      mode = { "n", "i", "t" }, desc = "Find file (⇧⌘O)" },
     -- mac IntelliJ: ⌘E → Recent files
     { "<D-e>", "<cmd>Telescope oldfiles<cr>",
-      mode = { "n", "i" }, desc = "Recent files (⌘E)" },
+      mode = { "n", "i", "t" }, desc = "Recent files (⌘E)" },
     -- mac IntelliJ: ⇧⌘F → Search in project
     { "<D-S-f>", "<cmd>Telescope live_grep<cr>",
-      mode = { "n", "i" }, desc = "Search in project (⇧⌘F)" },
+      mode = { "n", "i", "t" }, desc = "Search in project (⇧⌘F)" },
     -- mac IntelliJ: ⌥⌘O → Go to symbol (workspace)
     { "<D-A-o>", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
       mode = { "n", "i" }, desc = "Go to symbol (⌥⌘O)" },
