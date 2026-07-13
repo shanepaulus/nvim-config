@@ -2,17 +2,20 @@ return {
   {
     "akinsho/toggleterm.nvim",
     version = "*",
-    -- IntelliJ: Alt+4 → Terminal panel · Alt+Shift+4 → New terminal tab
+    -- IntelliJ: Alt+4 → Terminal panel · Alt+T → New terminal tab
     -- <N>Alt+4 (type a digit first, in Normal mode) jumps to/creates tab N —
     -- a fallback that needs no new key chord at all, in case a given chord
     -- gets grabbed by the desktop environment/terminal emulator first (e.g.
-    -- Ctrl+Alt+T is Cinnamon's global "open terminal" shortcut).
+    -- Ctrl+Alt+T is Cinnamon's global "open terminal" shortcut, and
+    -- Alt+Shift+4 is unreliable since Shift+4 types as "$" on most layouts,
+    -- so terminals report <A-$> rather than "Alt+Shift+4" — same class of
+    -- issue as Ctrl+Shift+N noted in telescope.lua).
     -- Registered as commands (defined in config()) so the very first keypress
     -- reliably lazy-loads the plugin before dispatching (same pattern as
     -- neo-tree/telescope's <cmd>...<cr> lazy-keys).
     keys = {
-      { "<A-4>",   '<Cmd>execute v:count . "TermTogglePanel"<CR>', mode = { "n", "i", "t" }, desc = "Terminal panel (Alt+4, <N>Alt+4 = tab N)" },
-      { "<A-S-4>", "<cmd>TermNewTab<cr>",                          mode = { "n", "i", "t" }, desc = "New terminal tab (Alt+Shift+4)" },
+      { "<A-4>", '<Cmd>execute v:count . "TermTogglePanel"<CR>', mode = { "n", "i", "t" }, desc = "Terminal panel (Alt+4, <N>Alt+4 = tab N)" },
+      { "<A-t>", "<cmd>TermNewTab<cr>",                          mode = { "n", "i", "t" }, desc = "New terminal tab (Alt+T)" },
     },
     -- also lazy-load if any of these are typed directly as commands
     cmd = { "ToggleTerm", "TermTogglePanel", "TermNewTab", "MavenRun", "GradleRun" },
