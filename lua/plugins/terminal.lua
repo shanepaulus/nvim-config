@@ -2,13 +2,17 @@ return {
   {
     "akinsho/toggleterm.nvim",
     version = "*",
-    -- IntelliJ: Alt+4 → Terminal panel · Ctrl+Alt+T → New terminal tab
+    -- IntelliJ: Alt+4 → Terminal panel · Alt+Shift+4 → New terminal tab
+    -- <N>Alt+4 (type a digit first, in Normal mode) jumps to/creates tab N —
+    -- a fallback that needs no new key chord at all, in case a given chord
+    -- gets grabbed by the desktop environment/terminal emulator first (e.g.
+    -- Ctrl+Alt+T is Cinnamon's global "open terminal" shortcut).
     -- Registered as commands (defined in config()) so the very first keypress
     -- reliably lazy-loads the plugin before dispatching (same pattern as
     -- neo-tree/telescope's <cmd>...<cr> lazy-keys).
     keys = {
-      { "<A-4>",   "<cmd>TermTogglePanel<cr>", mode = { "n", "i", "t" }, desc = "Toggle terminal panel (Alt+4)" },
-      { "<C-A-t>", "<cmd>TermNewTab<cr>",      mode = { "n", "i", "t" }, desc = "New terminal tab (Ctrl+Alt+T)" },
+      { "<A-4>",   '<Cmd>execute v:count . "TermTogglePanel"<CR>', mode = { "n", "i", "t" }, desc = "Terminal panel (Alt+4, <N>Alt+4 = tab N)" },
+      { "<A-S-4>", "<cmd>TermNewTab<cr>",                          mode = { "n", "i", "t" }, desc = "New terminal tab (Alt+Shift+4)" },
     },
     -- also lazy-load if any of these are typed directly as commands
     cmd = { "ToggleTerm", "TermTogglePanel", "TermNewTab", "MavenRun", "GradleRun" },
@@ -71,7 +75,13 @@ return {
         term_mod.get_or_create_term(id, nil, "horizontal"):open()
       end
 
-      local function toggle_panel()
+      -- count > 0 (from "<N>Alt+4") jumps straight to/creates tab N;
+      -- count == 0 (plain Alt+4) toggles the panel, remembering the last tab.
+      local function toggle_panel(count)
+        if count and count > 0 then
+          show_only_tab(count)
+          return
+        end
         local id = visible_tab_id()
         if id then
           term_mod.get(id):close()
@@ -122,7 +132,7 @@ return {
         end
       end
 
-      vim.api.nvim_create_user_command("TermTogglePanel", toggle_panel, {})
+      vim.api.nvim_create_user_command("TermTogglePanel", function(cmd_opts) toggle_panel(cmd_opts.count) end, { count = true })
       vim.api.nvim_create_user_command("TermNewTab", new_tab, {})
 
       -- Buffer-local keys set on every terminal (tabs AND Maven/Gradle floats):
