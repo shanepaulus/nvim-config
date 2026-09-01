@@ -68,11 +68,11 @@ return {
       { "<S-F8>", function() require("dap").step_out() end,          desc = "Debug: Step Out (Shift+F8)" },
       { "<F9>",   function() require("dap").toggle_breakpoint() end,  desc = "Debug: Toggle Breakpoint (F9)" },
       { "<C-F2>", function() require("dap").terminate() end,          desc = "Debug: Stop (Ctrl+F2)" },
-      {
-        "<S-F9>",
-        function() require("dap").continue() end,
-        desc = "Debug: Start (Shift+F9)",
-      },
+      -- Shift+F9 is intentionally not bound here: this entry just called
+      -- dap.continue(), identical to F5 above, and ftplugin/java.lua already
+      -- binds Shift+F9 per-buffer to a more useful Java-specific "debug
+      -- nearest test" action. Keeping both was pure redundancy — the global
+      -- one never did anything F5 didn't already do.
       {
         "<leader>dB",
         function()
