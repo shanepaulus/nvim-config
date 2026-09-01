@@ -19,8 +19,8 @@ return {
   {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
-    opts = {
-      ensure_installed = {
+    opts = function()
+      local ensure_installed = {
         "jdtls",      -- Java (binary used by ftplugin/java.lua, NOT configured here)
         "gopls",      -- Go
         "pyright",    -- Python
@@ -34,12 +34,24 @@ return {
         "lemminx",    -- XML (Maven pom.xml, Spring XML configs)
         "lua_ls",     -- Lua (editing this config)
         "bashls",     -- Bash / Shell
-        "roslyn_ls",  -- C# / .NET
-      },
-      -- Disabled: we call vim.lsp.enable() manually below (and Java uses ftplugin/java.lua).
-      -- automatic_enable = true would auto-start jdtls via lspconfig AND nvim-jdtls → conflict.
-      automatic_enable = false,
-    },
+      }
+
+      -- roslyn-language-server's Mason installer shells out to `dotnet` to
+      -- fetch its nuget package. Without the .NET SDK on PATH the install
+      -- fails every single startup, and mason-lspconfig surfaces that as a
+      -- vim.notify ERROR each time — so only ask for it when it can actually
+      -- install. Install the .NET SDK and restart Neovim to pick this up.
+      if vim.fn.executable("dotnet") == 1 then
+        table.insert(ensure_installed, "roslyn_ls")
+      end
+
+      return {
+        ensure_installed = ensure_installed,
+        -- Disabled: we call vim.lsp.enable() manually below (and Java uses ftplugin/java.lua).
+        -- automatic_enable = true would auto-start jdtls via lspconfig AND nvim-jdtls → conflict.
+        automatic_enable = false,
+      }
+    end,
   },
 
   -- Mason tool installer: formatters + DAP adapters
