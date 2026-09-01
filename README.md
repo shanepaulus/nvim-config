@@ -262,6 +262,18 @@ Without the Kitty keyboard protocol (or an equivalent CSI-u mode), a terminal ca
 
 Where this bites, the fix used in this config is to bind the same action to both the "real" IntelliJ chord and its Shift-stripped fallback (e.g. `Ctrl+Shift+F` and `Ctrl+F` both trigger live grep; `Ctrl+Shift+N` and `Ctrl+P` both trigger find-file) so it works everywhere regardless of terminal capability. If you hit a shortcut in this README that doesn't have a fallback yet and isn't working, that's the same root cause — either switch to a terminal with full keyboard-protocol support, or add a `<C-x>`-style fallback mapping next to the `<C-S-x>` one in the relevant `lua/plugins/*.lua` file.
 
+**Global search (`Ctrl+Shift+F`/`Ctrl+F`) does nothing, but find-file (`Ctrl+P`) works fine:**
+This is a missing `ripgrep` install, not a keybinding problem. `find_files` (`Ctrl+P`) falls back through `rg` → `fd` → plain `find`, and `find` is always present on Linux — so it silently keeps working even without `rg`. `live_grep` has no such fallback; it hard-requires `rg` and just does nothing without it. Check with:
+```bash
+rg --version
+```
+If that fails, install it (`fd` is optional — only speeds up/improves `find_files`, not required):
+```bash
+sudo apt install ripgrep fd-find   # Debian/Ubuntu/Mint
+brew install ripgrep fd            # macOS
+```
+No restart or config change needed after installing — Telescope picks it up on the next search.
+
 ## Structure
 
 ```
