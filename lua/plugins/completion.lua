@@ -1,6 +1,15 @@
 return {
   {
     "hrsh7th/nvim-cmp",
+    -- Pinned just before hrsh7th/nvim-cmp@2ffe79f ("fix(#1303): TextChanged
+    -- should update completion only on text added"), which requires the
+    -- cursor to advance by exactly one column between consecutive
+    -- TextChangedI events to trigger auto-completion. Any burst where two+
+    -- characters land in a single TextChangedI (normal fast typing,
+    -- autoindent, etc.) gets silently dropped, breaking IntelliJ-style
+    -- as-you-type suggestions. Unpin once upstream fixes this without
+    -- reintroducing #1303 (https://github.com/hrsh7th/nvim-cmp/issues/1303).
+    commit = "7d850f3daf38462c4760adae9cfdbd3417bbc01c",
     event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
