@@ -102,7 +102,7 @@ cd ~/.config/nvim && git pull
 | `Ctrl+F12` | File structure |
 | `Ctrl+Shift+O` | Workspace symbols |
 | `Ctrl+Shift+N` | Find file by name |
-| `Ctrl+Shift+F` | Live grep (search in files) |
+| `Ctrl+Shift+F` (or `Ctrl+F`) | Live grep (search in files) — both bound to the same action, see note below |
 | `Ctrl+E` | Recent files |
 | `Ctrl+G` | Go to line number |
 | `Alt+Left / Alt+Right` | Jump back / forward |
@@ -258,7 +258,9 @@ rm -rf ~/.cache/nvim/luac
 Then restart Neovim. Stale bytecode cache.
 
 **Ctrl+Shift / Ctrl+Alt shortcuts not working in terminal:**
-Some terminal emulators don't pass these key combinations through to Neovim. Check your terminal's key binding settings. Known to work well: WezTerm, Alacritty, Kitty.
+Without the Kitty keyboard protocol (or an equivalent CSI-u mode), a terminal can't distinguish e.g. `Ctrl+Shift+F` from `Ctrl+F` at the protocol level — both send the identical byte — so most default Linux terminals (GNOME Terminal, xterm, etc.) deliver the plain, un-shifted combo to Neovim instead. Terminals known to send the full combo correctly: WezTerm, Alacritty, Kitty.
+
+Where this bites, the fix used in this config is to bind the same action to both the "real" IntelliJ chord and its Shift-stripped fallback (e.g. `Ctrl+Shift+F` and `Ctrl+F` both trigger live grep; `Ctrl+Shift+N` and `Ctrl+P` both trigger find-file) so it works everywhere regardless of terminal capability. If you hit a shortcut in this README that doesn't have a fallback yet and isn't working, that's the same root cause — either switch to a terminal with full keyboard-protocol support, or add a `<C-x>`-style fallback mapping next to the `<C-S-x>` one in the relevant `lua/plugins/*.lua` file.
 
 ## Structure
 

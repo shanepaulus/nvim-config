@@ -7,9 +7,19 @@ local keys = {
   -- IntelliJ: Ctrl+Shift+N → Find File (kept for terminals that pass it through)
   { "<C-S-n>", "<cmd>Telescope find_files<cr>",
     mode = { "n", "i", "t" }, desc = "Find file (Ctrl+Shift+N)" },
-  -- IntelliJ: Ctrl+Shift+F → Search in project
+  -- IntelliJ: Ctrl+Shift+F → Search in project.
+  -- Ctrl+F also bound to the same action: without the Kitty keyboard
+  -- protocol (or an equivalent CSI-u mode), a terminal can't distinguish
+  -- Ctrl+Shift+F from Ctrl+F at the protocol level — both send the same
+  -- byte — so most default Linux terminals (GNOME Terminal, xterm, etc.)
+  -- deliver Ctrl+Shift+F to Neovim as plain <C-f>. Binding both means it
+  -- works everywhere: capable terminals (Kitty/WezTerm/Alacritty) hit
+  -- <C-S-f>, everything else hits <C-f> — same fix pattern as Ctrl+P
+  -- covering for Ctrl+Shift+N above. Ctrl+F is otherwise unused here.
   { "<C-S-f>", "<cmd>Telescope live_grep<cr>",
     mode = { "n", "i", "t" }, desc = "Search in project (Ctrl+Shift+F)" },
+  { "<C-f>", "<cmd>Telescope live_grep<cr>",
+    mode = { "n", "i", "t" }, desc = "Search in project (Ctrl+F, terminals that swallow Shift)" },
   -- IntelliJ: Ctrl+E → Recent files
   { "<C-e>", "<cmd>Telescope oldfiles<cr>",
     mode = { "n", "i", "t" }, desc = "Recent files (Ctrl+E)" },
