@@ -25,7 +25,7 @@ return {
         "gopls",      -- Go
         "pyright",    -- Python
         "ts_ls",      -- TypeScript / JavaScript
-        -- "volar",   -- Vue 3 (add back if needed; name may vary by mason-lspconfig version)
+        "vue_ls",     -- Vue 3 (hybrid mode, bridges to ts_ls for .vue TS support)
         "html",       -- HTML
         "cssls",      -- CSS
         "tailwindcss",-- Tailwind CSS
@@ -34,6 +34,7 @@ return {
         "lemminx",    -- XML (Maven pom.xml, Spring XML configs)
         "lua_ls",     -- Lua (editing this config)
         "bashls",     -- Bash / Shell
+        "roslyn_ls",  -- C# / .NET
       },
       -- Disabled: we call vim.lsp.enable() manually below (and Java uses ftplugin/java.lua).
       -- automatic_enable = true would auto-start jdtls via lspconfig AND nvim-jdtls → conflict.
@@ -182,6 +183,13 @@ return {
         },
       })
 
+      -- ts_ls must also attach to .vue files: vue_ls runs in hybrid mode and
+      -- forwards TS requests (imports, types, etc.) to whichever ts_ls/vtsls
+      -- client is attached to the same buffer.
+      vim.lsp.config("ts_ls", {
+        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+      })
+
       vim.lsp.config("lua_ls", {
         settings = {
           Lua = {
@@ -201,7 +209,7 @@ return {
         "gopls",
         "pyright",
         "ts_ls",
-        -- "volar",  -- Vue 3: commented out (see ensure_installed above)
+        "vue_ls",
         "html",
         "cssls",
         "tailwindcss",
@@ -210,6 +218,7 @@ return {
         "lemminx",
         "lua_ls",
         "bashls",
+        "roslyn_ls",
       })
     end,
   },

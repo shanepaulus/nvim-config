@@ -14,7 +14,14 @@ return {
         "html", "css", "json", "yaml", "xml", "bash", "lua",
         "markdown", "markdown_inline", "query", "regex", "vim", "vimdoc",
         "dockerfile", "toml", "groovy",
+        "c", "cpp", "rust", "ruby", "php", "sql", "hcl", "make", "cmake", "proto",
       },
+      -- Any filetype not in the list above still gets highlighting: this
+      -- installs its parser on first open instead of leaving the buffer
+      -- with no highlighting at all (the actual root cause of "syntax only
+      -- works on certain files" — ensure_installed alone only covers the
+      -- languages listed above).
+      auto_install = true,
       highlight = { enable = true, additional_vim_regex_highlighting = false },
       indent = { enable = true },
       incremental_selection = {
@@ -71,5 +78,13 @@ return {
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
     end,
+  },
+
+  -- Auto-close/rename HTML/JSX/Vue tags (IntelliJ/WebStorm behavior: typing
+  -- <div> appends </div>, editing the opening tag renames the closing one)
+  {
+    "windwp/nvim-ts-autotag",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = {},
   },
 }
