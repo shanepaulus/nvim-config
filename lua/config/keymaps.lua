@@ -82,11 +82,11 @@ map({ "n", "i" }, "<C-g>", goto_line, "Go to line (Ctrl+G)")
 map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
 map("n", "<A-Right>", "<C-i>", "Jump forward (Alt+Right)")
 
--- Buffer navigation (IntelliJ Ctrl+Tab / Ctrl+Shift+Tab / Ctrl+F4)
-map("n", "<C-Tab>",   "<cmd>bnext<cr>",     "Next buffer (Ctrl+Tab)")
-map("n", "<C-S-Tab>", "<cmd>bprevious<cr>", "Prev buffer (Ctrl+Shift+Tab)")
-map("n", "<C-F4>",    "<cmd>bdelete<cr>",   "Close buffer (Ctrl+F4)")  -- may be intercepted by terminal
-map({ "n", "i" }, "<C-q>", "<cmd>bdelete<cr>", "Close buffer (Ctrl+Q)")
+-- Buffer navigation (IntelliJ Ctrl+Tab / Ctrl+Shift+Tab / Ctrl+F4 / Ctrl+Q):
+-- owned by bufferline's `keys` spec in plugins/ui.lua, not duplicated here.
+-- Both files used to register the same lhs with a separate vim.keymap.set
+-- call — whichever loaded last silently won, and which-key's health check
+-- (`:checkhealth which-key`) had two conflicting entries to report on.
 
 -- Window navigation (Ctrl+hjkl)
 map("n", "<C-h>", "<C-w>h", "Window left")

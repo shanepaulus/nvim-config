@@ -113,7 +113,7 @@ return {
         { "<C-Tab>",   "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer (Ctrl+Tab)" },
         { "<C-S-Tab>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer (Ctrl+Shift+Tab)" },
         { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
-        { "<C-q>",  "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+Q)" },
+        { "<C-q>",  "<cmd>bdelete<cr>", mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
       }
       if require("config.util").is_mac() then
         -- mac IntelliJ: ⌘W → Close tab
