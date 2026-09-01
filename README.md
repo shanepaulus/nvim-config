@@ -7,7 +7,8 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - IntelliJ keyboard shortcuts (Ctrl+B, Alt+Enter, Shift+F6, Ctrl+D, etc.)
 - Custom `shane_paulus` dark colorscheme (ported from IntelliJ)
 - Java LSP via `nvim-jdtls` (Lombok, DAP debugging, test runner, code generation)
-- LSP for Go, Python, TypeScript, HTML, CSS, Tailwind, JSON, YAML, XML, Lua, Bash
+- LSP for Go, Python, TypeScript, Vue, HTML, CSS, Tailwind, JSON, YAML, XML, Lua, Bash, C#/.NET (`roslyn_ls`, requires the .NET SDK on `PATH`)
+- Auto-closing/renaming HTML/JSX/Vue tags via `nvim-ts-autotag`
 - Telescope fuzzy finder (Ctrl+Shift+N, Ctrl+Shift+F, Ctrl+E)
 - neo-tree file explorer (Alt+1)
 - DAP debugging with UI (F5/F8/F7/F9)
@@ -131,7 +132,21 @@ cd ~/.config/nvim && git pull
 | Key | Action |
 |-----|--------|
 | `Alt+1` | Toggle file explorer (neo-tree) |
-| `Alt+4` | Toggle terminal |
+| `Alt+4` | Toggle terminal panel (opens at the bottom, remembers last tab) |
+| `<N>Alt+4` | Jump to/create terminal tab N (type the digit first in Normal mode, e.g. `2` then `Alt+4`) |
+
+### Terminal Tabs (IntelliJ-style)
+
+The terminal panel opens as a horizontal split at the bottom of the window, with numbered tabs — same on macOS and Linux, since none of these are Cmd-based chords.
+
+| Key | Action |
+|-----|--------|
+| `Alt+T` | New terminal tab |
+| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Next / previous terminal tab (while focused in a terminal) |
+| `Ctrl+F4` | Close current terminal tab |
+| `Ctrl+Up` / `Ctrl+Down` | Resize terminal panel height |
+
+`Ctrl+Alt+T` was deliberately avoided for "new tab" — it's Cinnamon's (and some other Linux DEs') global "open terminal" shortcut and never reaches Neovim.
 
 ### Debugging (DAP)
 
@@ -195,7 +210,7 @@ On macOS the config additionally registers Cmd-based shortcuts mirroring the **s
 | `⌘1` | Toggle file explorer |
 | `⌘F2` | Debug: stop |
 
-Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `Alt+J/K`, `Alt+1`, `Alt+4`, `Alt+Enter`, `Alt+F7`), and Ghostty's own ⌘ bindings must be released for the chords Neovim needs:
+Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `Alt+J/K`, `Alt+1`, `Alt+4`, `Alt+T`, `Alt+Enter`, `Alt+F7`), and Ghostty's own ⌘ bindings must be released for the chords Neovim needs:
 
 ```
 macos-option-as-alt = true
@@ -244,13 +259,6 @@ Then restart Neovim. Stale bytecode cache.
 
 **Ctrl+Shift / Ctrl+Alt shortcuts not working in terminal:**
 Some terminal emulators don't pass these key combinations through to Neovim. Check your terminal's key binding settings. Known to work well: WezTerm, Alacritty, Kitty.
-
-## Adding Vue Support
-
-Vue LSP (`volar`) is commented out because the lspconfig server name can vary by mason-lspconfig version. To add it:
-
-1. Check the current valid name: `:h mason-lspconfig-server-map` inside Neovim
-2. Uncomment and correct the name in `lua/plugins/lsp.lua` (both `ensure_installed` and `vim.lsp.enable`)
 
 ## Structure
 
