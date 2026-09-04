@@ -60,9 +60,6 @@ if vim.fn.executable(mason_bin) ~= 1 then
   return
 end
 
--- ── 3. Per-project workspace cache ──────────────────────────────────────────
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-local workspace_dir = vim.fn.expand("~/.cache/nvim/jdtls-workspace/") .. project_name
 
 -- ── 4. DAP bundles (java-debug-adapter + vscode-java-test) ──────────────────
 local bundles = {}
@@ -107,13 +104,54 @@ local cmd = { mason_bin }
 for _, arg in ipairs(jvm_args) do
   table.insert(cmd, "--jvm-arg=" .. arg)
 end
-vim.list_extend(cmd, { "-data", workspace_dir })
 
 -- ── 7. jdtls config ──────────────────────────────────────────────────────────
-local root_dir = require("jdtls.setup").find_root({
-  "build.gradle", "build.gradle.kts", "pom.xml",
-  ".git", "mvnw", "gradlew",
-})
+-- jdtls.setup.find_root() returns the NEAREST ancestor holding any marker,
+-- which is wrong for multi-module builds: for drobe/backend/src/... it stops
+-- at drobe/backend (build.gradle.kts) instead of drobe/, where
+-- settings.gradle.kts and gradle/libs.versions.toml actually live. jdtls then
+-- tries to import the subproject as a standalone build, Gradle fails to
+-- resolve `libs.*`, and every file comes back as
+--   "<File>.java is a non-project file, only syntax errors are reported"
+-- — no completion, no go-to-definition, just syntax highlighting.
+--
+-- Prefer the OUTERMOST root instead: the topmost settings.gradle(.kts) for
+-- Gradle, the topmost pom.xml for Maven aggregator builds. The walk stops at
+-- the enclosing git repo so an unrelated build file further up the filesystem
+-- can never capture the project.
+local function find_project_root()
+  local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":p:h")
+  local function has(d, name)
+    return vim.uv.fs_stat(d .. "/" .. name) ~= nil
+  end
+
+  local gradle_root, maven_root, nearest_build, git_root
+  while true do
+    if has(dir, "settings.gradle") or has(dir, "settings.gradle.kts") then
+      gradle_root = dir -- keep overwriting while ascending: ends up outermost
+    end
+    if has(dir, "pom.xml") then
+      maven_root = dir
+    end
+    if not nearest_build and (has(dir, "build.gradle") or has(dir, "build.gradle.kts")
+        or has(dir, "pom.xml") or has(dir, "mvnw") or has(dir, "gradlew")) then
+      nearest_build = dir
+    end
+    if has(dir, ".git") then
+      git_root = dir
+      break -- repo boundary
+    end
+    local parent = vim.fn.fnamemodify(dir, ":h")
+    if parent == dir then
+      break
+    end
+    dir = parent
+  end
+
+  return gradle_root or maven_root or nearest_build or git_root
+end
+
+local root_dir = find_project_root()
 if not root_dir then
   vim.notify(
     "jdtls: no project root found (looked for build.gradle(.kts)/pom.xml/.git/mvnw/gradlew).\n"
@@ -122,6 +160,14 @@ if not root_dir then
   )
   return
 end
+
+-- Per-project workspace cache. Keyed off root_dir rather than getcwd(): the
+-- cwd depends on where nvim happened to be launched, so the same project
+-- opened from two directories used to get two workspaces (re-indexing every
+-- time), and two projects opened from the same cwd used to share one.
+local workspace_dir = vim.fn.expand("~/.cache/nvim/jdtls-workspace/")
+  .. vim.fn.fnamemodify(root_dir, ":p:h:t")
+vim.list_extend(cmd, { "-data", workspace_dir })
 
 -- Gradle/Maven home: only set if explicitly configured via env var.
 -- Neither install location is OS-portable to hardcode (Homebrew/SDKMAN paths
@@ -169,7 +215,7 @@ local config = {
         enabled = true,
         settings = {
           -- Per-project formatter XML takes precedence; falls back to Google style
-          url     = vim.fn.glob(vim.fn.getcwd() .. "/eclipse-formatter.xml"),
+          url     = vim.fn.glob(root_dir .. "/eclipse-formatter.xml"),
           profile = "GoogleStyle",
         },
       },

@@ -294,6 +294,29 @@ copy-only: pasting reads Neovim's own register, because an OSC 52 clipboard *rea
 terminals prompt (or hang) on every `p`. Installing a real provider restores true two-way sync and
 disables the fallback automatically.
 
+**Java completion returns nothing (`this.` shows no fields/methods), but the file still highlights:**
+Check the diagnostics on line 1 of the file — the giveaway is:
+```
+<File>.java is a non-project file, only syntax errors are reported
+```
+jdtls attached but never imported the build, so it has no classpath and no semantic model: syntax
+highlighting keeps working while completion, go-to-definition and find-usages all come back empty.
+The usual cause is jdtls rooting itself at a **submodule** instead of the real build root — a Gradle
+subproject whose `build.gradle(.kts)` resolves `libs.*` from a root `gradle/libs.versions.toml`
+cannot be configured standalone. `ftplugin/java.lua` picks the outermost `settings.gradle(.kts)`
+(Gradle) or `pom.xml` (Maven aggregator), bounded by the enclosing git repo, so this should resolve
+itself. Confirm which root it chose:
+```
+:lua =vim.lsp.get_clients({ bufnr = 0 })[1].root_dir
+```
+It must be the directory holding `settings.gradle(.kts)` / the parent `pom.xml`, not the submodule.
+If a stale workspace is cached from a previous bad root, clear it and reopen:
+```bash
+rm -rf ~/.cache/nvim/jdtls-workspace/<project-name>
+```
+Importing a Gradle/Maven project also makes jdtls write Eclipse metadata (`.project`, `.classpath`,
+`.settings/`, `bin/`) into the project — add those to the project's `.gitignore`.
+
 ## Structure
 
 ```
