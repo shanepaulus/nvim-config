@@ -23,7 +23,7 @@ return {
       local ensure_installed = {
         "jdtls",      -- Java (binary used by ftplugin/java.lua, NOT configured here)
         "gopls",      -- Go
-        "pyright",    -- Python
+        "basedpyright", -- Python (pyright fork: adds the library index pyright lacks)
         "ts_ls",      -- TypeScript / JavaScript
         "vue_ls",     -- Vue 3 (hybrid mode, bridges to ts_ls for .vue TS support)
         "html",       -- HTML
@@ -198,8 +198,55 @@ return {
       -- ts_ls must also attach to .vue files: vue_ls runs in hybrid mode and
       -- forwards TS requests (imports, types, etc.) to whichever ts_ls/vtsls
       -- client is attached to the same buffer.
-      vim.lsp.config("ts_ls", {
+      --
+      -- Attaching is necessary but NOT sufficient. Plain tsserver cannot parse a
+      -- single-file component at all, so without @vue/typescript-plugin loaded it
+      -- answers every request about a .vue buffer with nothing: no completion, no
+      -- auto-import, no types — while both servers still report as attached, which
+      -- makes it look like a completion bug rather than a missing plugin.
+      -- Mason ships the plugin inside the vue-language-server package; tsserver
+      -- resolves it by name from `location`.
+      local vue_ls_path = vim.fn.stdpath("data")
+        .. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+
+      local ts_ls_opts = {
         filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+      }
+      -- Guarded: on a fresh install Mason may not have fetched vue-language-server
+      -- yet, and pointing tsserver at a missing plugin makes it fail to start for
+      -- every JS/TS file, not just Vue ones.
+      if vim.fn.isdirectory(vue_ls_path) == 1 then
+        ts_ls_opts.init_options = {
+          plugins = {
+            {
+              name      = "@vue/typescript-plugin",
+              location  = vue_ls_path,
+              languages = { "vue" },
+            },
+          },
+        }
+      end
+      vim.lsp.config("ts_ls", ts_ls_opts)
+
+      -- Python uses basedpyright, not pyright. Stock pyright only offers
+      -- auto-imports for symbols it has already parsed, so `Path` never suggests
+      -- `from pathlib import Path` — the stdlib/library index that makes
+      -- auto-import work in Pylance is closed-source and absent from pyright.
+      -- basedpyright is the drop-in fork that ships that index (`indexing`).
+      -- Its default typeCheckingMode is "recommended", which floods an ordinary
+      -- project with strictness errors, so pin it back to "standard".
+      vim.lsp.config("basedpyright", {
+        settings = {
+          basedpyright = {
+            analysis = {
+              autoImportCompletions  = true,
+              indexing               = true,
+              useLibraryCodeForTypes = true,
+              typeCheckingMode       = "standard",
+              diagnosticMode         = "openFilesOnly",
+            },
+          },
+        },
       })
 
       vim.lsp.config("lua_ls", {
@@ -219,7 +266,7 @@ return {
       -- Enable all non-Java servers (Java uses ftplugin/java.lua via nvim-jdtls)
       vim.lsp.enable({
         "gopls",
-        "pyright",
+        "basedpyright",
         "ts_ls",
         "vue_ls",
         "html",

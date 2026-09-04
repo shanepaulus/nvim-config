@@ -26,6 +26,7 @@ return {
         typescript = { "prettier" },
         typescriptreact   = { "prettier" },
         javascriptreact   = { "prettier" },
+        vue        = { "prettier" },
         html       = { "prettier" },
         css        = { "prettier" },
         json       = { "prettier" },

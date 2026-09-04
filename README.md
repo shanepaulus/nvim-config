@@ -43,6 +43,7 @@ These need to be on your `PATH`:
 | `fzf` | fuzzy matching | `brew install fzf` / `apt install fzf` |
 | `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
+| `node` + `npm` | TypeScript / Vue language servers | [nodejs.org](https://nodejs.org) / `brew install node` |
 | `xclip` / `wl-clipboard` | system clipboard (Linux only — macOS uses built-in `pbcopy`) | `apt install xclip` (X11) / `apt install wl-clipboard` (Wayland) |
 | `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
@@ -316,6 +317,25 @@ rm -rf ~/.cache/nvim/jdtls-workspace/<project-name>
 ```
 Importing a Gradle/Maven project also makes jdtls write Eclipse metadata (`.project`, `.classpath`,
 `.settings/`, `bin/`) into the project — add those to the project's `.gitignore`.
+
+**Completion works but auto-import doesn't (or Vue files get no completion at all):**
+Run the suite — it drives a real Neovim per language, types an unimported symbol, confirms the
+completion and asserts the import statement actually landed:
+```bash
+./tests/autoimport.sh            # everything available
+./tests/autoimport.sh vue java   # just these
+```
+A missing toolchain reports SKIP, never FAIL. Two things this has caught:
+
+- **Vue: `ts_ls` attaches but answers nothing.** `vue_ls` runs in hybrid mode and handles only the
+  template/style blocks; TypeScript comes from `ts_ls`. Plain `tsserver` cannot parse a single-file
+  component, so unless it loads `@vue/typescript-plugin` it returns no completions, no auto-imports
+  and no types for `.vue` buffers — while `:LspInfo` still shows both servers happily attached,
+  which makes it read as a completion bug rather than a missing plugin.
+- **Python: pyright has no library index.** Stock pyright only auto-imports symbols from files it
+  has already parsed, so `Path` never offers `from pathlib import Path`. The index that makes this
+  work in Pylance is closed-source, so this config uses **basedpyright**, the drop-in fork that
+  ships one.
 
 ## Structure
 
