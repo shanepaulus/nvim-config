@@ -43,6 +43,7 @@ These need to be on your `PATH`:
 | `fzf` | fuzzy matching | `brew install fzf` / `apt install fzf` |
 | `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
+| `xclip` / `wl-clipboard` | system clipboard (Linux only — macOS uses built-in `pbcopy`) | `apt install xclip` (X11) / `apt install wl-clipboard` (Wayland) |
 | `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
 
@@ -273,6 +274,25 @@ sudo apt install ripgrep fd-find   # Debian/Ubuntu/Mint
 brew install ripgrep fd            # macOS
 ```
 No restart or config change needed after installing — Telescope picks it up on the next search.
+
+**Yanking in Neovim doesn't reach the system clipboard (paste into another app gives the wrong text):**
+`opt.clipboard = "unnamedplus"` does not talk to the OS by itself — it delegates to an external
+provider, and on Linux none of them ship with Neovim. Without `xclip`/`xsel` (X11) or `wl-clipboard`
+(Wayland) every yank stays inside Neovim and nothing warns you at startup. macOS is unaffected:
+`pbcopy`/`pbpaste` are always present. Check with:
+```
+:checkhealth vim.provider
+```
+A `clipboard: No provider` line is the confirmation. Install one:
+```bash
+sudo apt install xclip          # X11 (echo $XDG_SESSION_TYPE == x11)
+sudo apt install wl-clipboard   # Wayland
+```
+As a safety net, `lua/config/options.lua` falls back to OSC 52 when no provider is found, so copying
+still works over SSH or on a bare box — the terminal itself carries the yank. That fallback is
+copy-only: pasting reads Neovim's own register, because an OSC 52 clipboard *read* makes most
+terminals prompt (or hang) on every `p`. Installing a real provider restores true two-way sync and
+disables the fallback automatically.
 
 ## Structure
 
