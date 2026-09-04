@@ -165,7 +165,8 @@ end
 -- cwd depends on where nvim happened to be launched, so the same project
 -- opened from two directories used to get two workspaces (re-indexing every
 -- time), and two projects opened from the same cwd used to share one.
-local workspace_dir = vim.fn.expand("~/.cache/nvim/jdtls-workspace/")
+local workspace_dir = vim.fn.stdpath("cache")
+  .. "/jdtls-workspace/"
   .. vim.fn.fnamemodify(root_dir, ":p:h:t")
 vim.list_extend(cmd, { "-data", workspace_dir })
 
