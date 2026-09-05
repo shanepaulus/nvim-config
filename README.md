@@ -44,6 +44,7 @@ These need to be on your `PATH`:
 | `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
 | `node` + `npm` | TypeScript / Vue language servers | [nodejs.org](https://nodejs.org) / `brew install node` |
+| `dotnet` (.NET SDK) | C# / `roslyn_ls` — optional; the server is only installed when `dotnet` is on `PATH` | `curl -fsSL https://dot.net/v1/dotnet-install.sh \| bash -s -- --channel LTS` (installs to `~/.dotnet`, no root) |
 | `xclip` / `wl-clipboard` | system clipboard (Linux only — macOS uses built-in `pbcopy`) | `apt install xclip` (X11) / `apt install wl-clipboard` (Wayland) |
 | `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
@@ -336,6 +337,25 @@ A missing toolchain reports SKIP, never FAIL. Two things this has caught:
   has already parsed, so `Path` never offers `from pathlib import Path`. The index that makes this
   work in Pylance is closed-source, so this config uses **basedpyright**, the drop-in fork that
   ships one.
+
+**C#: completion stops matching after two or three characters:**
+Known and unfixed — the cause is server-side. `roslyn_ls` attaches, loads the project and returns
+completions (including unimported types), but for a short prefix it returns a *truncated* list while
+marking it `isIncomplete = false`:
+```
+prefix 'R'     items=545   isIncomplete=false   Regex=false   <- truncated, but claims complete
+prefix 'Re'    items=1000  isIncomplete=true    Regex=true
+```
+`isIncomplete = false` tells nvim-cmp the list is exhaustive, so it caches that slice and never
+re-queries. Every further keystroke filters the same stale 545 entries: typing `Regex` narrows
+545 → 53 → 6 → 2 → 0 and the symbol never appears, because it was never in the first response.
+Auto-import in C# therefore does not work end-to-end.
+
+Short prefixes do work, and `<C-Space>` re-queries manually at the current prefix. The real fix is
+a Roslyn-aware client such as [`seblyng/roslyn.nvim`](https://github.com/seblyng/roslyn.nvim);
+raising `keyword_length` for `cs` was tried and does **not** fix it (the truncated-but-complete
+response comes back at two characters too). Every other language is covered by
+`./tests/autoimport.sh`; C# is deliberately not, because it would fail.
 
 ## Structure
 
