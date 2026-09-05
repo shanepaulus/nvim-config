@@ -338,24 +338,21 @@ A missing toolchain reports SKIP, never FAIL. Two things this has caught:
   work in Pylance is closed-source, so this config uses **basedpyright**, the drop-in fork that
   ships one.
 
-**C#: completion stops matching after two or three characters:**
-Known and unfixed — the cause is server-side. `roslyn_ls` attaches, loads the project and returns
-completions (including unimported types), but for a short prefix it returns a *truncated* list while
-marking it `isIncomplete = false`:
+**C#: `roslyn_ls` answers completion requests with a stale, truncated list.**
+Immediately after a keystroke, `roslyn_ls` returns a *truncated* completion list but marks it
+`isIncomplete = false` — nvim-cmp takes that as authoritative, caches the slice and never
+re-queries, so the menu stays empty for anything past a couple of characters even though the
+symbol exists. Measured, identical request, same buffer text, two timings:
 ```
-prefix 'R'     items=545   isIncomplete=false   Regex=false   <- truncated, but claims complete
-prefix 'Re'    items=1000  isIncomplete=true    Regex=true
++60ms   items=545   isIncomplete=false   StringBuilder absent   <- stale, falsely "complete"
++2000ms items=1000  isIncomplete=true    StringBuilder present
 ```
-`isIncomplete = false` tells nvim-cmp the list is exhaustive, so it caches that slice and never
-re-queries. Every further keystroke filters the same stale 545 entries: typing `Regex` narrows
-545 → 53 → 6 → 2 → 0 and the symbol never appears, because it was never in the first response.
-Auto-import in C# therefore does not work end-to-end.
-
-Short prefixes do work, and `<C-Space>` re-queries manually at the current prefix. The real fix is
-a Roslyn-aware client such as [`seblyng/roslyn.nvim`](https://github.com/seblyng/roslyn.nvim);
-raising `keyword_length` for `cs` was tried and does **not** fix it (the truncated-but-complete
-response comes back at two characters too). Every other language is covered by
-`./tests/autoimport.sh`; C# is deliberately not, because it would fail.
+The settle time varies with project size and machine — a single fixed delay (250ms, 500ms, 800ms
+were each tried) is not reliable. `lua/plugins/completion.lua` works around this for `cs` buffers
+only: on every keystroke it re-issues `cmp.complete()` on a short retry ladder (400/1000/2000ms),
+stopping as soon as the menu has entries. Every other language's server reports `isIncomplete`
+honestly and needs none of this. Covered by `./tests/autoimport.sh cs` (requires the .NET SDK —
+see the dependency table above).
 
 ## Structure
 

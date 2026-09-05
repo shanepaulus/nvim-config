@@ -36,6 +36,26 @@ return {
         "bashls",     -- Bash / Shell
       }
 
+      -- Launched from a desktop launcher rather than a terminal, Neovim never
+      -- sources the shell rc that puts a user-local .NET SDK on PATH, so the
+      -- `dotnet` probe below would fail and C# would silently lose its LSP in
+      -- exactly the sessions that are hardest to debug. Add the standard
+      -- install locations ourselves when they exist and dotnet is not already
+      -- resolvable (~/.dotnet is used by dotnet-install.sh on both Linux and
+      -- macOS; /usr/local/share/dotnet is the macOS installer's location).
+      if vim.fn.executable("dotnet") ~= 1 then
+        for _, dir in ipairs({
+          vim.fn.expand("~/.dotnet"),
+          "/usr/local/share/dotnet",
+        }) do
+          if vim.fn.isdirectory(dir) == 1 then
+            vim.env.PATH = vim.env.PATH .. ":" .. dir
+            vim.env.DOTNET_ROOT = vim.env.DOTNET_ROOT or dir
+            break
+          end
+        end
+      end
+
       -- roslyn-language-server's Mason installer shells out to `dotnet` to
       -- fetch its nuget package. Without the .NET SDK on PATH the install
       -- fails every single startup, and mason-lspconfig surfaces that as a

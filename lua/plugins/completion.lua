@@ -98,6 +98,63 @@ return {
         },
         experimental = { ghost_text = { hl_group = "CmpGhostText" } },
       })
+
+      -- C#: re-issue the completion request until roslyn_ls catches up.
+      --
+      -- Immediately after a keystroke roslyn_ls answers with a STALE, truncated
+      -- snapshot that it marks `isIncomplete = false`. nvim-cmp trusts that, caches
+      -- the slice and never re-queries, so the menu stays empty for anything past a
+      -- couple of characters. The identical request a moment later is answered
+      -- correctly. Measured, same position, same buffer text "StringBuil":
+      --   +60ms   -> 545 items,  isIncomplete=false, StringBuilder absent
+      --   +2000ms -> 1000 items, isIncomplete=true,  StringBuilder present
+      -- So re-ask after the server settles. The delay it needs varies with project
+      -- size and machine, and a single fixed delay was measured failing at 250, 500
+      -- and 800ms, so retry on a short ladder and stop as soon as entries arrive.
+      -- Scoped to cs: every other server labels its responses honestly.
+      local cs_timers = {}
+      local function cs_cancel()
+        for _, t in ipairs(cs_timers) do
+          t:stop()
+        end
+        cs_timers = {}
+      end
+
+      vim.api.nvim_create_autocmd("TextChangedI", {
+        group = vim.api.nvim_create_augroup("CmpRoslynRequery", { clear = true }),
+        callback = function()
+          if vim.bo.filetype ~= "cs" then
+            return
+          end
+          cs_cancel()
+          for _, delay in ipairs({ 400, 1000, 2000 }) do
+            table.insert(cs_timers, vim.defer_fn(function()
+              if vim.api.nvim_get_mode().mode:sub(1, 1) ~= "i" or vim.bo.filetype ~= "cs" then
+                return
+              end
+              -- Already showing something: the server has caught up, leave it be
+              -- rather than resetting the menu under the cursor.
+              if #(cmp.get_entries() or {}) > 0 then
+                return
+              end
+              local col    = vim.api.nvim_win_get_cursor(0)[2]
+              local before = vim.api.nvim_get_current_line():sub(1, col)
+              -- Only with a real word to filter on: re-asking after `.` or a space
+              -- would fight cmp's own trigger-character handling.
+              local word = before:match("[%w_]+$")
+              if word and #word >= 2 then
+                cmp.complete()
+              end
+            end, delay))
+          end
+        end,
+      })
+
+      -- A pending re-ask must not fire into a closed menu or another buffer.
+      vim.api.nvim_create_autocmd({ "InsertLeave", "BufLeave" }, {
+        group = "CmpRoslynRequery",
+        callback = cs_cancel,
+      })
     end,
   },
 }

@@ -121,6 +121,14 @@ POM
     > "$WORK/java/src/main/java/com/example/App.java"
 }
 
+# -------------------------------------------------------------------- csharp --
+setup_cs() {
+  mkdir -p "$WORK/cs"
+  ( cd "$WORK/cs" && dotnet new console --name App -o . ) >/dev/null 2>&1
+  printf 'namespace App;\n\npublic class Worker\n{\n    public void Run()\n    {\n\n    }\n}\n' \
+    > "$WORK/cs/Program.cs"
+}
+
 echo "auto-import checks (each drives a real nvim; jdtls in particular is slow)"
 echo
 
@@ -151,6 +159,12 @@ if wanted java; then
   if have java; then setup_java
     check java "$WORK/java" "src/main/java/com/example/App.java" 5 "List" "List" "import java.util.List" 35000
   else skip_lang java "no JDK on PATH"; fi
+fi
+
+if wanted cs; then
+  if have dotnet; then setup_cs
+    check cs "$WORK/cs" "Program.cs" 7 "StringBuil" "StringBuilder" "using System.Text;" 55000
+  else skip_lang cs "no .NET SDK on PATH"; fi
 fi
 
 echo
