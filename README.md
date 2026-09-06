@@ -44,10 +44,18 @@ These need to be on your `PATH`:
 | `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
 | `node` + `npm` | TypeScript / Vue language servers | [nodejs.org](https://nodejs.org) / `brew install node` |
-| `dotnet` (.NET SDK) | C# / `roslyn_ls` — optional; the server is only installed when `dotnet` is on `PATH` | `curl -fsSL https://dot.net/v1/dotnet-install.sh \| bash -s -- --channel LTS` (installs to `~/.dotnet`, no root) |
+| `dotnet` (.NET SDK **10.0.400**, pinned) | C# / `roslyn_ls` — optional; the server is only installed when `dotnet` is on `PATH` | `curl -fsSL https://dot.net/v1/dotnet-install.sh \| bash -s -- --version 10.0.400` (installs to `~/.dotnet`, no root, works on both Linux and macOS/Apple Silicon) |
 | `xclip` / `wl-clipboard` | system clipboard (Linux only — macOS uses built-in `pbcopy`) | `apt install xclip` (X11) / `apt install wl-clipboard` (Wayland) |
 | `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
+
+**Why the .NET version is pinned, not `--channel LTS`:** the C# auto-import fix (see Troubleshooting)
+works around a real bug in a specific `roslyn_ls` build — a stale/truncated completion response
+that under-reports as complete. `--channel LTS` resolves to whatever the latest LTS build is *at
+install time*, which drifts: a Mac set up next month could pull a newer SDK, a newer Roslyn, and
+inherit a different (unverified) version of that bug, or none at all. Pinning `--version 10.0.400`
+guarantees the exact SDK this fix was built and measured against. Bump this pin deliberately, and
+re-run `./tests/autoimport.sh cs` after, rather than letting it float.
 
 ### Java (if you work with Java projects)
 
