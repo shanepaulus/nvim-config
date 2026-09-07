@@ -24,6 +24,7 @@ return {
         end,
       },
       "saadparwaiz1/cmp_luasnip",
+      "zbirenbaum/copilot-cmp",
     },
     config = function()
       local cmp     = require("cmp")
@@ -79,6 +80,7 @@ return {
           ["<CR>"] = cmp.mapping.confirm({ select = false }),
         }),
         sources = cmp.config.sources({
+          { name = "copilot",  priority = 1100 },
           { name = "nvim_lsp", priority = 1000 },
           { name = "luasnip",  priority = 750 },
           { name = "buffer",   priority = 500, keyword_length = 3 },
@@ -88,6 +90,7 @@ return {
           format = function(entry, item)
             item.kind = string.format("%s %s", kind_icons[item.kind] or "", item.kind)
             item.menu = ({
+              copilot  = "[Copilot]",
               nvim_lsp = "[LSP]",
               luasnip  = "[Snip]",
               buffer   = "[Buf]",
