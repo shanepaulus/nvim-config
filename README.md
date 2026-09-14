@@ -84,6 +84,47 @@ On the **first launch**:
 3. **Restart Neovim** after Mason finishes
 4. Open a Java file — `jdtls` indexes your project on first open (15-60s)
 
+### ⚠️ New Mac? Two files outside this repo need setting up
+
+This repo only syncs `~/.config/nvim`. On every new Mac, set up these two by hand as well, or ⌘/⌥ shortcuts and Java navigation won't work:
+
+**1. Ghostty config**: `~/.config/ghostty/config` (create it, it doesn't exist by default)
+
+```
+macos-option-as-alt = true
+
+# Release Ghostty defaults that collide with the IntelliJ-style maps:
+# new split, close surface, select all, search selection (⌘E), prev/next split, goto tab 1 (⌘1).
+# Ghostty rejects trailing comments on a line, so keep comments on their own lines.
+keybind = super+d=unbind
+keybind = super+w=unbind
+keybind = super+a=unbind
+keybind = super+e=unbind
+keybind = super+left_bracket=unbind
+keybind = super+right_bracket=unbind
+keybind = super+physical:one=unbind
+keybind = super+digit_1=unbind
+```
+
+Then validate it and **fully quit Ghostty (⌘Q)** and reopen it (new windows alone don't reload the Option-as-Alt setting):
+
+```bash
+/Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
+```
+
+Without `macos-option-as-alt`, Option types characters (`∫` for ⌥B) instead of acting as Alt, so `⌥⌘B`, `Ctrl+Alt+B`, `Alt+J/K`, `Alt+Enter`, `Alt+F7` all do nothing.
+
+**2. `JAVA_HOME` in `~/.zshrc`** (Homebrew JDK): point it at the real JDK home, **not** `/opt/homebrew/opt/openjdk` (that's a wrapper with only `bin/` symlinks):
+
+```bash
+export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+`ftplugin/java.lua` copes with the wrapper path on its own, but Maven/Gradle and other tools need the correct one.
+
+**Quick check afterwards:** open any code file in `nvim`, put the cursor on a function call and press `⌘B` (definition) and `⌥⌘B` (implementation).
+
 ## Updating
 
 ```bash
