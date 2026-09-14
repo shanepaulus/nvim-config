@@ -239,6 +239,13 @@ Check the exact defaults on your Ghostty version with `ghostty +list-keybinds --
 
 Testing note: the Cmd maps are gated on `has("mac")`; set `NVIM_MAC_KEYS=1` to force-register them on Linux (see `lua/config/util.lua`).
 
+**If `⌘B` / `⌥⌘B` (or any ⌘ chord) do nothing:**
+
+1. Confirm Ghostty isn't swallowing the chord itself: `ghostty +list-keybinds --default | grep -i "super+b\|super+alt+b\|super+opt+b"`. Ghostty intercepts some Alt combos before the kitty protocol ever sees them (it does this for `alt+left`/`alt+right` by default); if `super+b` or `super+alt+b` shows up, unbind it the same way as the entries above.
+2. Confirm Ghostty is sending the kitty-protocol sequence at all: open Ghostty's inspector (`⌘⌥I`) → Keyboard tab, press the chord, and check a CSI-u sequence is emitted rather than nothing/a plain byte.
+3. Confirm Neovim is requesting/receiving it: `:echo has('nvim-0.10')` (need ≥0.10), then in Neovim run `:lua vim.on_key(function(k) vim.print(k) end)`, press the chord, and check `:messages` for the raw bytes.
+4. If step 2 shows nothing reaches the pty, `macos-option-as-alt = true` may not be set, or the Ghostty version predates full kitty-protocol support — update Ghostty and re-check.
+
 ## Troubleshooting
 
 **Colors look wrong:**
