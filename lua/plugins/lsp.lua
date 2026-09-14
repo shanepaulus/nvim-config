@@ -133,54 +133,132 @@ return {
         },
       })
 
-      -- Shared on_attach: keymaps for every LSP buffer
-      -- (Java gets these PLUS extras in ftplugin/java.lua)
-      local on_attach = function(_, bufnr)
-        local map = function(lhs, rhs, desc, mode)
-          mode = mode or "n"
-          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "LSP: " .. desc })
+      -- IntelliJ-style navigation: a single target is jumped to directly; several
+      -- open a small filterable popup AT THE CURSOR instead of Neovim's default
+      -- quickfix list at the bottom of the screen. Results from every attached
+      -- client are merged by vim.lsp.buf.* and de-duplicated here, since e.g.
+      -- .vue buffers have both vue_ls and ts_ls answering with the same location
+      -- (which would otherwise show a "choice" of two identical entries).
+      -- telescope.builtin.lsp_implementations is not used: on the pinned 0.1.x
+      -- branch it requests each client separately (two pickers with two
+      -- servers) and calls LSP util functions deprecated in Neovim 0.12.
+      local function goto_or_pick(title)
+        return function(list)
+          local items, seen = {}, {}
+          for _, item in ipairs(list.items) do
+            local key = string.format("%s:%d:%d", item.filename, item.lnum, item.col)
+            if not seen[key] then
+              seen[key] = true
+              table.insert(items, item)
+            end
+          end
+
+          if #items == 1 then
+            local item = items[1]
+            local b = item.bufnr or vim.fn.bufadd(item.filename)
+            vim.cmd("normal! m'") -- jumplist, so Alt+Left / ⌘[ returns here
+            vim.bo[b].buflisted = true
+            vim.api.nvim_win_set_buf(0, b)
+            vim.api.nvim_win_set_cursor(0, { item.lnum, math.max(item.col - 1, 0) })
+            vim.cmd("normal! zv")
+            return
+          end
+
+          if vim.fn.mode() ~= "n" then
+            vim.cmd("stopinsert")
+          end
+          local pickers      = require("telescope.pickers")
+          local finders      = require("telescope.finders")
+          local make_entry   = require("telescope.make_entry")
+          local conf         = require("telescope.config").values
+          local opts = require("telescope.themes").get_cursor({
+            previewer   = false,
+            path_display = { "tail" },
+            fname_width = 32,
+            trim_text   = true,
+            layout_config = {
+              width  = math.min(110, vim.o.columns - 4),
+              height = math.min(#items + 4, 16),
+            },
+          })
+          pickers.new(opts, {
+            prompt_title = string.format("%s (%d)", title, #items),
+            finder = finders.new_table({
+              results     = items,
+              entry_maker = make_entry.gen_from_quickfix(opts),
+            }),
+            sorter = conf.generic_sorter(opts),
+            push_cursor_on_edit   = true,
+            push_tagstack_on_edit = true,
+          }):find()
         end
-
-        local tb = require("telescope.builtin")
-
-        map("<C-b>",   vim.lsp.buf.definition,                  "Go to definition (Ctrl+B)")
-        map("<C-b>",   vim.lsp.buf.definition,                  "Go to definition (Ctrl+B)", "i")
-        map("<C-A-b>", vim.lsp.buf.implementation,              "Go to implementation (Ctrl+Alt+B)")
-        map("<C-A-b>", vim.lsp.buf.implementation,              "Go to implementation (Ctrl+Alt+B)", "i")
-        map("<A-F7>",  tb.lsp_references,                       "Find usages (Alt+F7)")
-        map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)")
-        map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)", "i")
-        map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)")
-        map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)", "i")
-        map("<S-F6>",  vim.lsp.buf.rename,                      "Rename symbol (Shift+F6)")
-        map("<C-F12>", tb.lsp_document_symbols,                 "File structure (Ctrl+F12)")
-        map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)")
-        map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)", "i")
-
-        vim.keymap.set("i", "<C-S-p>", vim.lsp.buf.signature_help,
-          { buffer = bufnr, desc = "LSP: Signature help" })
-
-        -- mac IntelliJ equivalents (stock macOS keymap); ⌥F7 find usages matches already
-        if require("config.util").is_mac() then
-          map("<D-b>",   vim.lsp.buf.definition,     "Go to definition (⌘B)")
-          map("<D-b>",   vim.lsp.buf.definition,     "Go to definition (⌘B)", "i")
-          map("<D-A-b>", vim.lsp.buf.implementation, "Go to implementation (⌥⌘B)")
-          map("<D-A-b>", vim.lsp.buf.implementation, "Go to implementation (⌥⌘B)", "i")
-          map("<D-y>",   vim.lsp.buf.hover,          "Quick definition (⌘Y)")
-        end
-
-        vim.api.nvim_create_autocmd("CursorHold", {
-          buffer = bufnr,
-          callback = function()
-            vim.diagnostic.open_float(nil, { focus = false })
-          end,
-        })
       end
 
-      -- Apply shared capabilities + on_attach to ALL servers enabled below
+      local goto_definition = function()
+        vim.lsp.buf.definition({ on_list = goto_or_pick("Choose Definition") })
+      end
+      local goto_implementation = function()
+        vim.lsp.buf.implementation({ on_list = goto_or_pick("Choose Implementation") })
+      end
+
+      -- Shared keymaps for EVERY LSP buffer, via LspAttach rather than a shared
+      -- on_attach. vim.lsp.config("*", { on_attach = ... }) is the LOWEST-priority
+      -- layer: nvim-lspconfig's own lsp/<server>.lua files sit above it, and
+      -- basedpyright, ts_ls and roslyn_ls each define their own on_attach, which
+      -- silently replaced ours — Python, JS/TS/Vue and C# had no Ctrl+B/⌘B/⌥⌘B/
+      -- Alt+F7/... at all. jdtls (ftplugin/java.lua) is started outside
+      -- vim.lsp.config too. An LspAttach autocmd fires for every client no matter
+      -- how it was configured or started, so these can't be overridden.
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("shared_lsp_keymaps", { clear = true }),
+        callback = function(event)
+          local bufnr = event.buf
+          local map = function(lhs, rhs, desc, mode)
+            mode = mode or "n"
+            vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "LSP: " .. desc })
+          end
+
+          local tb = require("telescope.builtin")
+
+          map("<C-b>",   goto_definition,                         "Go to definition (Ctrl+B)")
+          map("<C-b>",   goto_definition,                         "Go to definition (Ctrl+B)", "i")
+          map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)")
+          map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)", "i")
+          map("<A-F7>",  tb.lsp_references,                       "Find usages (Alt+F7)")
+          map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)")
+          map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)", "i")
+          map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)")
+          map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)", "i")
+          map("<S-F6>",  vim.lsp.buf.rename,                      "Rename symbol (Shift+F6)")
+          map("<C-F12>", tb.lsp_document_symbols,                 "File structure (Ctrl+F12)")
+          map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)")
+          map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)", "i")
+          map("<C-S-p>", vim.lsp.buf.signature_help,              "Signature help", "i")
+
+          -- mac IntelliJ equivalents (stock macOS keymap); ⌥F7 find usages matches already
+          if require("config.util").is_mac() then
+            map("<D-b>",   goto_definition,     "Go to definition (⌘B)")
+            map("<D-b>",   goto_definition,     "Go to definition (⌘B)", "i")
+            map("<D-A-b>", goto_implementation, "Go to implementation (⌥⌘B)")
+            map("<D-A-b>", goto_implementation, "Go to implementation (⌥⌘B)", "i")
+            map("<D-y>",   vim.lsp.buf.hover,          "Quick definition (⌘Y)")
+          end
+
+          -- Several clients can attach to one buffer (e.g. .vue: vue_ls + ts_ls +
+          -- tailwindcss) — a per-buffer group keeps this to a single autocmd.
+          vim.api.nvim_create_autocmd("CursorHold", {
+            group = vim.api.nvim_create_augroup("lsp_diag_float_" .. bufnr, { clear = true }),
+            buffer = bufnr,
+            callback = function()
+              vim.diagnostic.open_float(nil, { focus = false })
+            end,
+          })
+        end,
+      })
+
+      -- Apply shared capabilities to ALL servers enabled below
       vim.lsp.config("*", {
         capabilities = capabilities,
-        on_attach = on_attach,
       })
 
       -- Server-specific settings (merged on top of lspconfig defaults)

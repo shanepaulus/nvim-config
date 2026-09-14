@@ -60,7 +60,6 @@ re-run `./tests/autoimport.sh cs` after, rather than letting it float.
 ### Java (if you work with Java projects)
 
 - **JDK 17+** on your `PATH` — `jdtls` will auto-detect it via `java -XshowSettings:all`
-- If detection fails, the config falls back to `/usr/lib/jvm/java-25-openjdk-amd64` — edit `ftplugin/java.lua` to match your JDK path
 - **Gradle** is expected at `/opt/gradle` — change `java.gradle.home` in `ftplugin/java.lua` if yours is elsewhere
 - **Maven** is expected at `/opt/maven` — change `java.import.maven.home` similarly
 
@@ -104,8 +103,8 @@ cd ~/.config/nvim && git pull
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+B` | Go to definition |
-| `Ctrl+Alt+B` | Go to implementation |
+| `Ctrl+B` | Go to definition (jumps directly if there is one target, otherwise a pick-list popup at the cursor) |
+| `Ctrl+Alt+B` | Go to implementation (jumps directly if there is one, otherwise a pick-list popup at the cursor) |
 | `Alt+F7` | Find usages |
 | `Ctrl+Shift+I` | Hover documentation |
 | `Alt+Enter` | Code action / quick fix |
@@ -226,13 +225,17 @@ Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `
 ```
 macos-option-as-alt = true
 
-# Release Ghostty defaults that collide with the IntelliJ-style maps
-keybind = super+d=unbind                 # new split
-keybind = super+w=unbind                 # close surface
-keybind = super+a=unbind                 # select all
-keybind = super+left_bracket=unbind      # previous split
-keybind = super+right_bracket=unbind     # next split
-keybind = super+physical:one=unbind      # goto tab 1 (frees ⌘1)
+# Release Ghostty defaults that collide with the IntelliJ-style maps:
+# new split, close surface, select all, search selection (⌘E), prev/next split, goto tab 1 (⌘1).
+# Ghostty rejects trailing comments on a line, so keep comments on their own lines.
+keybind = super+d=unbind
+keybind = super+w=unbind
+keybind = super+a=unbind
+keybind = super+e=unbind
+keybind = super+left_bracket=unbind
+keybind = super+right_bracket=unbind
+keybind = super+physical:one=unbind
+keybind = super+digit_1=unbind
 ```
 
 Check the exact defaults on your Ghostty version with `ghostty +list-keybinds --default` — any ⌘ chord left unbound passes through to Neovim automatically. `⌘C`/`⌘V` need no unbinding: Ghostty's copy only fires when a terminal selection exists, and its paste works in Neovim via bracketed paste.
@@ -259,6 +262,28 @@ If that fixes it, ensure your terminal supports 24-bit color (most modern termin
 :checkhealth vim.lsp
 :LspInfo
 ```
+
+**Java: go-to-definition/implementation does nothing, bogus errors in every file (macOS / Homebrew):**
+Check `~/.cache/nvim/jdtls-workspace/<project>/.metadata/.log` for `Missing system library` or
+`Unable to locate JDK types`. It means jdtls was handed a folder that isn't a real JDK home. The usual cause is
+`export JAVA_HOME="/opt/homebrew/opt/openjdk"`: that's Homebrew's wrapper (only `bin/` symlinks). The real JDK is
+under `libexec/openjdk.jdk/Contents/Home`:
+```bash
+export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+```
+`ftplugin/java.lua` now resolves the wrapper path on its own, but a correct `JAVA_HOME` keeps Maven/Gradle happy too.
+After fixing, delete the stale workspace (`rm -rf ~/.cache/nvim/jdtls-workspace/<project>`) and reopen the file.
+The `sun.misc.Unsafe` / `final field mutation` / `incubator modules` warnings in `lsp.log` are harmless noise from newer JDKs.
+
+**LSP shortcuts (Ctrl+B, ⌘B, Alt+F7, ...) missing in some languages but not others:** the shared LSP keymaps
+live in an `LspAttach` autocmd in `lua/plugins/lsp.lua`, so they apply to every server. Don't move them back into
+`vim.lsp.config("*", { on_attach = ... })`: that is the lowest-priority layer, and nvim-lspconfig's own
+`basedpyright`, `ts_ls` and `roslyn_ls` configs define an `on_attach` that silently replaces it (Python, JS/TS/Vue and
+C# lost every LSP shortcut that way). Check a buffer with `:verbose nmap <C-b>`.
+
+**⌥ shortcuts (Alt+J/K, Ctrl+Alt+B, ⌥⌘B) do nothing on macOS:** Ghostty is missing
+`macos-option-as-alt = true` (see "macOS (Ghostty)" above). Validate the config with
+`/Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config`, then fully quit and reopen Ghostty.
 
 **jdtls failing on Java files:**
 ```

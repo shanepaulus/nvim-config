@@ -8,17 +8,34 @@ if not ok then return end
 -- ── 1. Detect JDK home ───────────────────────────────────────────────────────
 -- Tries, in order: $JAVA_HOME, macOS's java_home tool, `java` on PATH.
 -- No OS-specific path is ever assumed to exist — every candidate is verified
--- with isdirectory() before use, since a wrong guess here breaks jdtls silently.
+-- by resolve_jdk() before use, since a wrong guess here breaks jdtls silently.
+--
+-- An existing directory is not enough: Homebrew's `/opt/homebrew/opt/openjdk`
+-- (the path `brew info openjdk` suggests for JAVA_HOME) is a wrapper holding
+-- only bin/ symlinks — the real JDK lives under libexec/openjdk.jdk/Contents/Home.
+-- Handing jdtls the wrapper makes it log "Missing system library" / "Unable to
+-- locate JDK types": the project half-imports with bogus errors and
+-- go-to-definition/implementation silently do nothing.
+local function resolve_jdk(path)
+  if not path or path == "" then return nil end
+  for _, candidate in ipairs({ path, path .. "/libexec/openjdk.jdk/Contents/Home" }) do
+    if vim.uv.fs_stat(candidate .. "/release") then
+      return candidate
+    end
+  end
+  return nil
+end
+
 local function get_java_home()
-  local env_home = vim.env.JAVA_HOME
-  if env_home and env_home ~= "" and vim.fn.isdirectory(env_home) == 1 then
+  local env_home = resolve_jdk(vim.env.JAVA_HOME)
+  if env_home then
     return env_home
   end
 
   if vim.fn.has("mac") == 1 and vim.fn.executable("/usr/libexec/java_home") == 1 then
     local mac_home = vim.trim(vim.fn.system("/usr/libexec/java_home 2>/dev/null"))
-    if vim.v.shell_error == 0 and mac_home ~= "" and vim.fn.isdirectory(mac_home) == 1 then
-      return mac_home
+    if vim.v.shell_error == 0 and resolve_jdk(mac_home) then
+      return resolve_jdk(mac_home)
     end
   end
 
@@ -26,12 +43,25 @@ local function get_java_home()
     local result = vim.fn.system("java -XshowSettings:all -version 2>&1")
     local home = result:match("java%.home%s*=%s*(.-)%s*\n")
       or result:match("java%.home%s*=%s*(.-)%s*$")
-    if home and vim.fn.isdirectory(home) == 1 then
-      return home
+    if resolve_jdk(home) then
+      return resolve_jdk(home)
     end
   end
 
   return nil
+end
+
+-- Execution-environment name for the detected JDK (e.g. "JavaSE-26"), read from
+-- its `release` file so the runtime label always matches the actual JDK.
+local function jdk_runtime_name(home)
+  local ok_read, lines = pcall(vim.fn.readfile, home .. "/release")
+  if ok_read then
+    for _, line in ipairs(lines) do
+      local major = line:match('^JAVA_VERSION="1%.(%d+)') or line:match('^JAVA_VERSION="(%d+)')
+      if major then return "JavaSE-" .. major end
+    end
+  end
+  return "JavaSE-25"
 end
 
 local java_home = get_java_home()
@@ -192,7 +222,7 @@ local config = {
         updateBuildConfiguration = "interactive",
         runtimes = {
           {
-            name = "JavaSE-25",
+            name = jdk_runtime_name(java_home),
             path = java_home,
           },
         },
@@ -282,20 +312,8 @@ local config = {
       vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "Java: " .. desc })
     end
 
-    -- ── LSP keymaps (same as other LSPs, set here for Java buffers) ───────────
-    local tb = require("telescope.builtin")
-
-    map("<C-b>",   vim.lsp.buf.definition,  "Go to definition (Ctrl+B)")
-    map("<C-b>",   vim.lsp.buf.definition,  "Go to definition (Ctrl+B)", "i")
-    map("<C-A-b>", vim.lsp.buf.implementation, "Go to implementation (Ctrl+Alt+B)")
-    map("<C-A-b>", vim.lsp.buf.implementation, "Go to implementation (Ctrl+Alt+B)", "i")
-    map("<A-F7>",  tb.lsp_references,       "Find usages (Alt+F7)")
-    map("<C-S-i>", vim.lsp.buf.hover,       "Hover doc (Ctrl+Shift+I)")
-    map("<C-S-i>", vim.lsp.buf.hover,       "Hover doc (Ctrl+Shift+I)", "i")
-    map("<A-CR>",  vim.lsp.buf.code_action, "Code action (Alt+Enter)")
-    map("<A-CR>",  vim.lsp.buf.code_action, "Code action (Alt+Enter)", "i")
-    map("<S-F6>",  vim.lsp.buf.rename,      "Rename (Shift+F6)")
-    map("<C-F12>", tb.lsp_document_symbols, "File structure (Ctrl+F12)")
+    -- Shared LSP keymaps (Ctrl+B, ⌘B, ⌥⌘B, Alt+F7, ...) come from the LspAttach
+    -- autocmd in lua/plugins/lsp.lua, which covers jdtls too. Java-only extras below.
 
     -- ── Java-specific IntelliJ keymaps ─────────────────────────────────────────
     -- IntelliJ: Alt+Insert → Generate (constructors, getters, toString, etc.)
