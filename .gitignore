@@ -5,3 +5,7 @@ Session.vim
 
 # Cache files
 .cache/
+
+# lazygit binary/archive (install via package manager, see README)
+/lazygit
+/lazygit.tar.gz
