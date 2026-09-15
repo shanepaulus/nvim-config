@@ -56,7 +56,28 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     keys = {
       { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+      { "<F4>", "<cmd>LazyGit<cr>", desc = "LazyGit (F4)" },
     },
     cmd = { "LazyGit" },
+  },
+
+  -- Fugitive: :Git blame gives a persistent per-line blame column (IntelliJ "Annotate" equivalent)
+  {
+    "tpope/vim-fugitive",
+    cmd = { "Git" },
+    keys = {
+      { "<leader>ga", "<cmd>Git blame<cr>", desc = "Annotate (blame column)" },
+    },
+  },
+
+  -- Diffview: per-file/commit history browser (IntelliJ "Log" tab equivalent)
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    keys = {
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "File history" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Repo history" },
+      { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diff view (working tree)" },
+    },
   },
 }

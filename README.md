@@ -13,7 +13,7 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - neo-tree file explorer (Alt+1)
 - DAP debugging with UI (F5/F8/F7/F9)
 - Auto-formatting via conform.nvim
-- Git integration via gitsigns + lazygit
+- Git integration via gitsigns + lazygit + vim-fugitive (IntelliJ-style Annotate blame column)
 - Completion via nvim-cmp + LuaSnip
 - Claude Code agent mode via claudecode.nvim (live diffs, selection context, `<leader>c*`)
 
@@ -41,13 +41,22 @@ These need to be on your `PATH`:
 | `git` | plugin manager | system package |
 | `fd` | telescope file search | `cargo install fd-find` or [release](https://github.com/sharkdp/fd/releases) |
 | `fzf` | fuzzy matching | `brew install fzf` / `apt install fzf` |
-| `lazygit` | git UI (Alt+G) | [release](https://github.com/jesseduffield/lazygit/releases) |
+| `lazygit` | git UI (F4) | [release binary](https://github.com/jesseduffield/lazygit/releases) (no `apt` package on Ubuntu/Debian/Mint — see snippet below) · `brew install lazygit` (macOS) · [full install docs](https://github.com/jesseduffield/lazygit#installation) |
+| `vim-fugitive` (bundled, no install) | `:Git blame` annotate column (`<leader>ga`) | installed automatically by lazy.nvim |
 | `ripgrep` | live grep | `brew install ripgrep` / `apt install ripgrep` |
 | `node` + `npm` | TypeScript / Vue language servers | [nodejs.org](https://nodejs.org) / `brew install node` |
 | `dotnet` (.NET SDK **10.0.400**, pinned) | C# / `roslyn_ls` — optional; the server is only installed when `dotnet` is on `PATH` | `curl -fsSL https://dot.net/v1/dotnet-install.sh \| bash -s -- --version 10.0.400` (installs to `~/.dotnet`, no root, works on both Linux and macOS/Apple Silicon) |
 | `xclip` / `wl-clipboard` | system clipboard (Linux only — macOS uses built-in `pbcopy`) | `apt install xclip` (X11) / `apt install wl-clipboard` (Wayland) |
 | `claude` | Claude Code agent mode (`<leader>cc`) | [install](https://docs.claude.com/claude-code) |
 | A [Nerd Font](https://www.nerdfonts.com/) | icons in the UI | set as your terminal font |
+
+**Installing `lazygit` on Ubuntu/Debian/Mint** (no current `apt` package):
+```bash
+LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+tar xf lazygit.tar.gz lazygit
+sudo install lazygit /usr/local/bin
+```
 
 **Why the .NET version is pinned, not `--channel LTS`:** the C# auto-import fix (see Troubleshooting)
 works around a real bug in a specific `roslyn_ls` build — a stale/truncated completion response
@@ -185,6 +194,32 @@ cd ~/.config/nvim && git pull
 | `Alt+1` | Toggle file explorer (neo-tree) |
 | `Alt+4` | Toggle terminal panel (opens at the bottom, remembers last tab) |
 | `<N>Alt+4` | Jump to/create terminal tab N (type the digit first in Normal mode, e.g. `2` then `Alt+4`) |
+
+### Git Workflow (IntelliJ-style)
+
+| Key | Action |
+|-----|--------|
+| `F4` (or `<leader>gg`) | Open LazyGit |
+| `<leader>ga` | Annotate — persistent per-line blame column (`:Git blame`, IntelliJ "Annotate") |
+| `<leader>gb` | Blame current line (popup) |
+| `<leader>gtb` | Toggle live current-line blame (virtual text) |
+| `<leader>gh` | File history |
+| `<leader>gH` | Repo history |
+| `<leader>gv` | Diff view (working tree) |
+| `]h` / `[h` | Next / previous hunk |
+| `<leader>gs` / `<leader>gr` | Stage / reset hunk |
+
+**Committing (inside LazyGit, `F4`):**
+1. `space` on a file in the Files panel — stage/unstage it (`a` stages all)
+2. `c` — commit message prompt, `Enter` to confirm
+3. `P` — push, `p` — pull
+4. `2` — jump to the commits/log panel (history), `Enter` on a commit to view its diff
+5. `q` — quit back to Neovim
+
+**Annotate / blame like IntelliJ:** `<leader>ga` opens a scroll-bound blame column down the left
+side of the file (author, date, commit summary per line) via `vim-fugitive`'s `:Git blame` — press
+`q` in the blame column to close it. gitsigns' `<leader>gb`/`<leader>gtb` only annotate the single
+line under the cursor, not the whole file.
 
 ### Terminal Tabs (IntelliJ-style)
 
@@ -456,7 +491,7 @@ see the dependency table above).
         ├── dap.lua           # Debug adapter + UI
         ├── editor.lua        # autopairs, surround, multi-cursor, comments
         ├── formatter.lua     # conform.nvim (google-java-format, prettier, etc.)
-        ├── git.lua           # gitsigns + lazygit
+        ├── git.lua           # gitsigns + lazygit + vim-fugitive (Annotate)
         ├── lsp.lua           # Mason + lspconfig (all non-Java LSPs)
         ├── neo-tree.lua      # File explorer
         ├── telescope.lua     # Fuzzy finder
