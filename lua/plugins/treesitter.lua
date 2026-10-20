@@ -10,7 +10,7 @@ return {
     opts = {
       ensure_installed = {
         "java", "go", "python", "javascript", "typescript", "tsx",
-        "vue", "scss", "graphql",
+        "vue", "svelte", "astro", "scss", "graphql",
         "html", "css", "json", "yaml", "xml", "bash", "lua",
         "markdown", "markdown_inline", "query", "regex", "vim", "vimdoc",
         "dockerfile", "toml", "groovy",

@@ -1,6 +1,9 @@
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 
+-- Neovim does not detect MDX by default; keep React docs on the web formatter.
+vim.filetype.add({ extension = { mdx = "markdown.mdx" } })
+
 -- Flash highlight on yank (IntelliJ-like confirmation flash)
 autocmd("TextYankPost", {
   group = augroup("highlight_yank", { clear = true }),
@@ -78,9 +81,12 @@ autocmd("FileType", {
 -- Web files: 2-space indent (standard web convention)
 autocmd("FileType", {
   group = augroup("ft_web", { clear = true }),
-  pattern = { "html", "css", "javascript", "typescript", "typescriptreact",
-              "javascriptreact", "json", "yaml", "lua", "xml" },
+  pattern = { "html", "css", "scss", "less", "javascript", "typescript",
+              "typescriptreact", "javascriptreact", "vue", "svelte", "astro",
+              "json", "jsonc", "yaml", "graphql", "markdown.mdx", "handlebars",
+              "lua", "xml" },
   callback = function()
+    vim.opt_local.expandtab = true
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
     vim.opt_local.softtabstop = 2

@@ -12,7 +12,7 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - Telescope fuzzy finder (Ctrl+Shift+N, Ctrl+Shift+F, Ctrl+E)
 - neo-tree file explorer (Alt+1)
 - DAP debugging with UI (F5/F8/F7/F9)
-- Auto-formatting via conform.nvim
+- Format on save via conform.nvim (Prettier for Vue, React/JSX/TSX, JS/TS, HTML and web styles)
 - Git integration via gitsigns + lazygit + vim-fugitive (IntelliJ-style Annotate blame column)
 - Completion via nvim-cmp + LuaSnip
 - Claude Code agent mode via claudecode.nvim (live diffs, selection context, `<leader>c*`)
@@ -92,6 +92,25 @@ On the **first launch**:
 2. `mason-tool-installer` downloads LSP servers and formatters (~5-10 min)
 3. **Restart Neovim** after Mason finishes
 4. Open a Java file — `jdtls` indexes your project on first open (15-60s)
+
+### Web formatting and indentation
+
+Saving with `Ctrl+S`, `⌘S` (macOS), or `:w` runs Prettier for JavaScript,
+TypeScript, React (`.jsx`/`.tsx`), Vue, HTML, CSS/SCSS/Less, JSON/JSONC, YAML,
+GraphQL, MDX and Handlebars. Svelte and Astro are also mapped to Prettier;
+install and configure `prettier-plugin-svelte` or `prettier-plugin-astro` in
+those projects. Conform prefers the project's `node_modules/.bin/prettier`
+and falls back to Mason's installed Prettier, respecting project formatting
+settings and `.prettierignore`.
+
+While typing, Tree-sitter handles indentation with a two-space default for web
+files, including Vue, Svelte and Astro. A project's `.editorconfig` can override
+the indentation settings. Prettier formats on save, rather than after each
+keystroke. To format immediately, use `Ctrl+Alt+L` (`⌥⌘L` on macOS).
+
+If saving doesn't format a file, run `:ConformInfo` in that buffer to see the
+selected formatter and its log. Syntax errors, ignored files, and missing
+project plugins can prevent formatting.
 
 ### ⚠️ New Mac? Two files outside this repo need setting up
 

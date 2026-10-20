@@ -5,7 +5,7 @@ return {
     cmd   = { "ConformInfo" },
     keys = (function()
       local format = function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({ async = true, lsp_format = "fallback" })
       end
       local keys = {
         -- IntelliJ: Ctrl+Alt+L → Reformat code
@@ -27,10 +27,19 @@ return {
         typescriptreact   = { "prettier" },
         javascriptreact   = { "prettier" },
         vue        = { "prettier" },
+        -- Svelte/Astro use the project's Prettier plugins (see README).
+        svelte     = { "prettier" },
+        astro      = { "prettier" },
         html       = { "prettier" },
         css        = { "prettier" },
+        scss       = { "prettier" },
+        less       = { "prettier" },
         json       = { "prettier" },
+        jsonc      = { "prettier" },
         yaml       = { "prettier" },
+        graphql    = { "prettier" },
+        ["markdown.mdx"] = { "prettier" },
+        handlebars = { "prettier" },
         xml        = { "prettier" },
         lua        = { "stylua" },
         sh         = { "shfmt" },
@@ -38,7 +47,7 @@ return {
       },
       format_on_save = {
         timeout_ms   = 3000,
-        lsp_fallback = true,
+        lsp_format = "fallback",
       },
       formatters = {
         ["google-java-format"] = {
