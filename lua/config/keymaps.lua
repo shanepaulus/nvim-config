@@ -88,6 +88,15 @@ map("n", "<C-A-_>",   "zM", "Collapse all folds (Ctrl+Alt+Shift+-)")
 map("n", "<C-A-S-=>", "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
 map("n", "<C-A-+>",   "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
 
+-- Bookmarks (IntelliJ F11 / Shift+F11) — see config/bookmarks.lua
+local bookmarks = require("config.bookmarks")
+map({ "n", "i" }, "<F11>",   bookmarks.toggle, "Toggle bookmark (F11)")
+map({ "n", "i" }, "<S-F11>", bookmarks.list,   "Show bookmarks (Shift+F11)")
+for n = 1, 9 do
+  map({ "n", "i" }, "<C-" .. n .. ">", function() bookmarks.jump(n) end, "Go to bookmark " .. n .. " (Ctrl+" .. n .. ")")
+  map({ "n", "i" }, "<C-S-" .. n .. ">", function() bookmarks.set(n) end, "Toggle bookmark " .. n .. " (Ctrl+Shift+" .. n .. ")")
+end
+
 -- Jump back / forward (IntelliJ Alt+Left / Alt+Right)
 map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
 map("n", "<A-Right>", "<C-i>", "Jump forward (Alt+Right)")
@@ -142,4 +151,6 @@ if require("config.util").is_mac() then
   map("n", "<D-[>", "<C-o>", "Jump back (⌘[)")
   map("n", "<D-]>", "<C-i>", "Jump forward (⌘])")
   map({ "n", "i" }, "<D-w>", "<cmd>bdelete<cr>", "Close buffer (⌘W)")
+  map({ "n", "i" }, "<F3>",    bookmarks.toggle, "Toggle bookmark (F3)")
+  map({ "n", "i" }, "<D-F3>",  bookmarks.list,   "Show bookmarks (⌘F3)")
 end
