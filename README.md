@@ -16,6 +16,11 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - Git integration via gitsigns + lazygit + vim-fugitive (IntelliJ-style Annotate blame column)
 - Completion via nvim-cmp + LuaSnip
 - Claude Code agent mode via claudecode.nvim (live diffs, selection context, `<leader>c*`)
+- Call hierarchy: callers (Ctrl+Alt+H) / callees (Ctrl+Alt+Shift+H)
+- Code folding via treesitter (Ctrl+Alt+- / Ctrl+Alt+=, add Shift for all; files open unfolded — plain Ctrl+-/= is the terminal's font size)
+- Breadcrumbs in the winbar via dropbar.nvim (Alt+Home to jump in)
+- Bookmarks on global marks A–Z: F11 toggle (gutter shows 1–9, then letters), Ctrl+Shift+1…9 set numbered, Ctrl+1…9 jump, Shift+F11 list, `:BookmarksClear` removes all
+- Local History via Neovim 0.12's built-in undo tree (`<leader>uu`; needs nvim 0.12+)
 
 ## Requirements
 
@@ -453,6 +458,11 @@ rm -rf ~/.cache/nvim/jdtls-workspace/<project-name>
 ```
 Importing a Gradle/Maven project also makes jdtls write Eclipse metadata (`.project`, `.classpath`,
 `.settings/`, `bin/`) into the project — add those to the project's `.gitignore`.
+
+**Bookmarks, folding, breadcrumbs, call hierarchy or local history not working:**
+```bash
+nvim --headless -i NONE -c "luafile tests/features.lua"   # -i NONE keeps test marks out of your shada
+```
 
 **Completion works but auto-import doesn't (or Vue files get no completion at all):**
 Run the suite — it drives a real Neovim per language, types an unimported symbol, confirms the
