@@ -97,6 +97,17 @@ for n = 1, 9 do
   map({ "n", "i" }, "<C-S-" .. n .. ">", function() bookmarks.set(n) end, "Toggle bookmark " .. n .. " (Ctrl+Shift+" .. n .. ")")
 end
 
+-- Local History (IntelliJ VCS › Local History): Neovim 0.12's built-in undo tree.
+-- undofile is on, so history survives restarts.
+local local_history = function()
+  if not pcall(vim.cmd.packadd, "nvim.undotree") then
+    vim.notify("Local History needs Neovim 0.12+ (nvim.undotree)", vim.log.levels.WARN)
+    return
+  end
+  require("undotree").open()
+end
+map("n", "<leader>uu", local_history, "Local history (undo tree)")
+
 -- Jump back / forward (IntelliJ Alt+Left / Alt+Right)
 map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
 map("n", "<A-Right>", "<C-i>", "Jump forward (Alt+Right)")
