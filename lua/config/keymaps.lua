@@ -78,6 +78,16 @@ local goto_line = function()
 end
 map({ "n", "i" }, "<C-g>", goto_line, "Go to line (Ctrl+G)")
 
+-- Folding. IntelliJ uses Ctrl+- / Ctrl+=, but Ghostty (like most terminals)
+-- keeps those for font size, so Alt is added. Shifted keys are mapped both
+-- ways because terminals report Shift+= / Shift+- as either S-= or +, S-- or _.
+map("n", "<C-A-->",   "zc", "Collapse fold (Ctrl+Alt+-)")
+map("n", "<C-A-=>",   "zo", "Expand fold (Ctrl+Alt+=)")
+map("n", "<C-A-S-->", "zM", "Collapse all folds (Ctrl+Alt+Shift+-)")
+map("n", "<C-A-_>",   "zM", "Collapse all folds (Ctrl+Alt+Shift+-)")
+map("n", "<C-A-S-=>", "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
+map("n", "<C-A-+>",   "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
+
 -- Jump back / forward (IntelliJ Alt+Left / Alt+Right)
 map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
 map("n", "<A-Right>", "<C-i>", "Jump forward (Alt+Right)")
