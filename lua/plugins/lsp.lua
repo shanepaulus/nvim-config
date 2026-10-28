@@ -225,6 +225,8 @@ return {
           map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)")
           map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)", "i")
           map("<A-F7>",  tb.lsp_references,                       "Find usages (Alt+F7)")
+          map("<C-A-h>",   tb.lsp_incoming_calls,                 "Call hierarchy: callers (Ctrl+Alt+H)")
+          map("<C-A-S-h>", tb.lsp_outgoing_calls,                 "Call hierarchy: callees (Ctrl+Alt+Shift+H)")
           map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)")
           map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)", "i")
           map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)")
