@@ -39,6 +39,9 @@ opt.timeoutlen = 300
 opt.splitbelow = true
 opt.splitright = true
 
+-- Shift+arrows select text (IntelliJ-style), plain arrows end the selection
+opt.keymodel = "startsel,stopsel"
+
 -- System clipboard — makes y/p work like IntelliJ Ctrl+C/Ctrl+V
 opt.clipboard = "unnamedplus"
 

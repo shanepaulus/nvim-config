@@ -202,6 +202,38 @@ local function run()
     eq(results.visual_indent, "      foo|      bar", "visual Tab")
   end)
 
+  check("Shift+arrows select text in normal and insert mode", function()
+    local prev = vim.api.nvim_get_current_buf()
+    local b = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_current_buf(b)
+    local function selected(keys)
+      vim.api.nvim_buf_set_lines(b, 0, -1, false, { "key: value", "next: line" })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      vim.api.nvim_feedkeys(vim.keycode(keys), "mx", false)
+      local mode = vim.fn.mode()
+      local text = table.concat(vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos(".")), "|")
+      vim.api.nvim_feedkeys(vim.keycode("<Esc><Esc>"), "nx", false)
+      return mode .. ":" .. text
+    end
+    local results = {
+      normal = selected("<S-Right><S-Right>"),
+      normal_down = selected("<S-Down>"),
+      insert = selected("i<S-Right><S-Right><S-Right>"),
+      shrink = selected("<S-Right><S-Right><S-Left>"),
+    }
+    vim.api.nvim_buf_set_lines(b, 0, -1, false, { "key: value" })
+    vim.api.nvim_win_set_cursor(0, { 1, 0 })
+    vim.api.nvim_feedkeys(vim.keycode("<S-Right><S-Right><C-c>"), "mx", false)
+    results.copied = vim.fn.getreg("+")
+    vim.api.nvim_set_current_buf(prev)
+    vim.api.nvim_buf_delete(b, { force = true })
+    eq(results.normal, "v:key", "normal Shift+Right")
+    eq(results.normal_down, "v:key: value|n", "normal Shift+Down")
+    eq(results.insert, "v:key:", "insert Shift+Right")
+    eq(results.shrink, "v:ke", "Shift+Left shrinks")
+    eq(results.copied, "key", "Ctrl+C copies selection")
+  end)
+
   -- dropbar attaches on its own autocmds; give it a moment
   vim.defer_fn(function()
     check("breadcrumbs: dropbar sets winbar", function()

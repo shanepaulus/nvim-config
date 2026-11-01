@@ -43,6 +43,9 @@ return {
         ["Select All"]         = "<C-S-l>",
         ["Add Cursor Down"]    = "<C-S-Down>",
         ["Add Cursor Up"]      = "<C-S-Up>",
+        -- free Shift+Left/Right for plain text selection (options.lua keymodel)
+        ["Select l"]           = "",
+        ["Select h"]           = "",
       }
       vim.g.VM_theme = "iceblue"
       vim.g.VM_highlight_matches = "underline"

@@ -222,6 +222,7 @@ Pressing `<leader>` and pausing also pops up which-key with the next available k
 | `Ctrl+Shift+D` | Delete line |
 | `Ctrl+/` | Toggle comment |
 | `Ctrl+A` | Select all |
+| `Shift+Arrows` | Select text (Normal or Insert mode); plain arrows end the selection |
 | `Ctrl+C` (visual) | Copy to clipboard |
 | `Ctrl+V` | Paste from clipboard |
 | `Ctrl+Q` | Close buffer |
