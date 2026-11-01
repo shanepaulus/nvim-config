@@ -1,4 +1,4 @@
--- Smoke test for the IntelliJ-gap features: bookmarks, folding, call hierarchy,
+-- Smoke test for the IntelliJ-gap features: bookmarks, call hierarchy,
 -- local history (undotree) and breadcrumbs (dropbar).
 --
 --   nvim --headless -i NONE -c "luafile tests/features.lua"
@@ -135,14 +135,15 @@ local function run()
     eq(sign_count(buf), 0, "signs")
   end)
 
-  check("folding: treesitter foldexpr, opens unfolded", function()
-    eq(vim.wo.foldmethod, "expr", "foldmethod")
-    eq(vim.wo.foldexpr, "v:lua.vim.treesitter.foldexpr()", "foldexpr")
-    eq(vim.wo.foldlevel, 99, "foldlevel")
+  check("shortcut finder: F1 lists only shortcuts with a description", function()
+    if vim.fn.maparg("<F1>", "n") == "" then error("missing <F1>", 0) end
+    local make = require("config.shortcuts").entry_maker({ width_lhs = 10 })
+    eq(make({ lhs = "x", mode = "n", buffer = 0, rhs = "y" }), nil, "map without desc")
+    if not make({ lhs = "x", mode = "n", buffer = 0, rhs = "y", desc = "Do it" }) then error("map with desc dropped", 0) end
   end)
 
   check("keymaps exist", function()
-    for _, lhs in ipairs({ "<C-A-->", "<C-A-=>", "<C-A-S-->", "<C-A-S-=>", "<F11>", "<S-F11>", "<leader>uu", "<A-Home>" }) do
+    for _, lhs in ipairs({ "<F11>", "<S-F11>", "<leader>uu", "<A-Home>", "<leader>fk" }) do
       if vim.fn.maparg(lhs, "n") == "" then error("missing " .. lhs, 0) end
     end
   end)

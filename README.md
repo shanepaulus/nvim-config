@@ -17,9 +17,9 @@ A full IntelliJ-like Neovim IDE configuration. Built to make the transition from
 - Completion via nvim-cmp + LuaSnip
 - Claude Code agent mode via claudecode.nvim (live diffs, selection context, `<leader>c*`)
 - Call hierarchy: callers (Ctrl+Alt+H) / callees (Ctrl+Alt+Shift+H)
-- Code folding via treesitter (Ctrl+Alt+- / Ctrl+Alt+=, add Shift for all; files open unfolded — plain Ctrl+-/= is the terminal's font size)
 - Breadcrumbs in the winbar via dropbar.nvim (Alt+Home to jump in)
 - Bookmarks on global marks A–Z: F11 toggle (gutter shows 1–9, then letters), Ctrl+Shift+1…9 set numbered, Ctrl+1…9 jump, Shift+F11 list, `:BookmarksClear` removes all
+- Shortcut finder (F1): searchable list of every shortcut in this config, Enter runs it
 - Local History via Neovim 0.12's built-in undo tree (`<leader>uu`; needs nvim 0.12+)
 
 ## Requirements
@@ -173,6 +173,17 @@ cd ~/.config/nvim && git pull
 
 ## Key Bindings
 
+`<leader>` is **Space**. Unless noted, keys work in Normal mode; most IntelliJ-style keys also work in Insert mode.
+
+### Find any shortcut
+
+Don't remember a key? Press **F1** (or `<leader>fk`): a searchable list of every shortcut in this
+config with its description, built live from your setup, so it never goes stale. Type part of a
+name (`rename`, `blame`, `bookmark`) or a key (`F11`), then **Enter** runs it, like IntelliJ's
+Find Action. Ctrl+Shift+A isn't used because Ghostty reserves it for select-all.
+
+Pressing `<leader>` and pausing also pops up which-key with the next available keys.
+
 ### Navigation (IntelliJ-style)
 
 | Key | Action |
@@ -180,18 +191,25 @@ cd ~/.config/nvim && git pull
 | `Ctrl+B` | Go to definition (jumps directly if there is one target, otherwise a pick-list popup at the cursor) |
 | `Ctrl+Alt+B` | Go to implementation (jumps directly if there is one, otherwise a pick-list popup at the cursor) |
 | `Alt+F7` | Find usages |
+| `Ctrl+Alt+H` | Call hierarchy: who calls this method |
+| `Ctrl+Alt+Shift+H` | Call hierarchy: what this method calls |
 | `Ctrl+Shift+I` | Hover documentation |
 | `Alt+Enter` | Code action / quick fix |
 | `Shift+F6` | Rename symbol |
 | `Ctrl+F12` | File structure |
 | `Ctrl+Shift+O` | Workspace symbols |
-| `Ctrl+Shift+N` | Find file by name |
+| `Ctrl+Shift+N` (or `Ctrl+P`) | Find file by name |
+| `Ctrl+N` | Symbols in current file |
 | `Ctrl+Shift+F` (or `Ctrl+F`) | Live grep (search in files) — both bound to the same action, see note below |
 | `Ctrl+E` | Recent files |
 | `Ctrl+G` | Go to line number |
 | `Alt+Left / Alt+Right` | Jump back / forward |
 | `Ctrl+Tab / Ctrl+Shift+Tab` | Next / previous buffer |
 | `Ctrl+F4` | Close buffer |
+| `F2` / `Shift+F2` | Next / previous error |
+| `Alt+Home` | Jump into the breadcrumbs bar (letters pick a segment, `j`/`k` + `Enter` to jump). Clicking a segment also works |
+| `]m` / `[m` | Next / previous method (`]]` / `[[` for class) |
+| `Ctrl+H/J/K/L` | Move between split windows |
 
 ### Editor
 
@@ -200,7 +218,7 @@ cd ~/.config/nvim && git pull
 | `Ctrl+S` | Save |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` / `Ctrl+Shift+Z` | Redo |
-| `Ctrl+D` | Duplicate line |
+| `Ctrl+D` | Insert mode: duplicate line. Normal mode: select next occurrence (multi-cursor, see below) |
 | `Ctrl+Shift+D` | Delete line |
 | `Ctrl+/` | Toggle comment |
 | `Ctrl+A` | Select all |
@@ -209,7 +227,53 @@ cd ~/.config/nvim && git pull
 | `Ctrl+Q` | Close buffer |
 | `Alt+J / Alt+K` | Move line down / up |
 | `Ctrl+Alt+W` | Toggle whitespace visibility |
+| `Ctrl+Alt+L` | Format file |
+| `Ctrl+Space` / `Backspace` | Extend / shrink selection by syntax node |
+| `<leader>uu` | Local History: undo tree of every change, survives restarts. `j`/`k` previews, `Ctrl+L` back to the file, `Ctrl+S` keeps that version |
 | `Shift+Alt+Enter/Up/Down/Left/Right` | Cycle alternatives (true↔false, &&↔\|\|, etc.) |
+
+### Multi-cursor
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+D` (Normal) | Select word, press again to add the next occurrence |
+| `Ctrl+Shift+L` | Select all occurrences |
+| `Ctrl+Shift+Up` / `Ctrl+Shift+Down` | Add cursor above / below |
+| `Esc` | Back to a single cursor |
+
+### Bookmarks (IntelliJ-style)
+
+Bookmarks are global marks, so they work across files and survive restarts. Bookmarks 1–9 show
+their number in the gutter.
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+Shift+1…9` | Set bookmark N on this line (moves it if already used, removes it if already here) |
+| `Ctrl+1…9` | Jump to bookmark N |
+| `F11` | Toggle a bookmark on this line (next free number) |
+| `Shift+F11` | List all bookmarks with preview |
+| `:BookmarksClear` | Remove all bookmarks |
+
+### Search (`<leader>f`)
+
+| Key | Action |
+|-----|--------|
+| `<leader>fk` | Find shortcut / action (same as F1) |
+| `<leader>fg` | Git-tracked files |
+| `<leader>fw` | Grep word under cursor |
+| `<leader>fb` | Open buffers |
+| `<leader>fd` | Diagnostics |
+| `<leader>fc` | Command history |
+
+### Problems & structure
+
+| Key | Action |
+|-----|--------|
+| `<leader>xx` | All diagnostics (Trouble) |
+| `<leader>xX` | Current-file diagnostics |
+| `<leader>xQ` / `<leader>xL` | Quickfix / location list |
+| `<leader>cs` | Symbols panel (Trouble) |
+| `<leader>co` | Code outline (Aerial) |
 
 ### Panels
 
@@ -232,6 +296,9 @@ cd ~/.config/nvim && git pull
 | `<leader>gv` | Diff view (working tree) |
 | `]h` / `[h` | Next / previous hunk |
 | `<leader>gs` / `<leader>gr` | Stage / reset hunk |
+| `<leader>gS` / `<leader>gR` | Stage / reset whole file |
+| `<leader>gu` | Undo stage hunk |
+| `<leader>gd` | Diff this file |
 
 **Committing (inside LazyGit, `F4`):**
 1. `space` on a file in the Files panel — stage/unstage it (`a` stages all)
@@ -267,6 +334,11 @@ The terminal panel opens as a horizontal split at the bottom of the window, with
 | `F8` | Step over |
 | `F7` | Step into |
 | `Shift+F8` | Step out |
+| `Ctrl+F2` | Stop |
+| `<leader>dB` | Conditional breakpoint |
+| `<leader>dl` | Log point |
+| `<leader>dr` | REPL |
+| `<leader>du` | Toggle debug UI |
 
 ### Java-specific
 
@@ -279,6 +351,17 @@ The terminal panel opens as a horizontal split at the bottom of the window, with
 | `<leader>jv` | Extract variable |
 | `<leader>jm` | Extract method |
 | `<leader>jc` | Extract constant |
+
+### AI (`<leader>c`)
+
+| Key | Action |
+|-----|--------|
+| `<leader>cc` | Claude: toggle (Visual: send selection) |
+| `<leader>ca` | Claude: add current file (Visual: add selection) |
+| `<leader>cf` | Claude: focus |
+| `<leader>cy` / `<leader>cn` | Claude: accept / reject diff |
+| `<leader>ch` | Copilot Chat: toggle |
+| `<leader>ce` / `<leader>cx` / `<leader>cr` / `<leader>ct` | Copilot Chat: explain / fix / review / tests |
 
 ### File Explorer (neo-tree, when focused)
 
@@ -459,7 +542,7 @@ rm -rf ~/.cache/nvim/jdtls-workspace/<project-name>
 Importing a Gradle/Maven project also makes jdtls write Eclipse metadata (`.project`, `.classpath`,
 `.settings/`, `bin/`) into the project — add those to the project's `.gitignore`.
 
-**Bookmarks, folding, breadcrumbs, call hierarchy or local history not working:**
+**Bookmarks, breadcrumbs, call hierarchy, shortcut finder or local history not working:**
 ```bash
 nvim --headless -i NONE -c "luafile tests/features.lua"   # -i NONE keeps test marks out of your shada
 ```

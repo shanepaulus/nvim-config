@@ -35,13 +35,6 @@ opt.swapfile = false
 opt.updatetime = 250
 opt.timeoutlen = 300
 
--- Folding (IntelliJ Ctrl+- / Ctrl+=): treesitter-based, files open unfolded
-opt.foldmethod = "expr"
-opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-opt.foldlevel = 99
-opt.foldlevelstart = 99
-opt.foldtext = ""
-
 -- Splits (IntelliJ-like panel placement)
 opt.splitbelow = true
 opt.splitright = true

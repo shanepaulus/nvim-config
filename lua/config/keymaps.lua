@@ -78,15 +78,11 @@ local goto_line = function()
 end
 map({ "n", "i" }, "<C-g>", goto_line, "Go to line (Ctrl+G)")
 
--- Folding. IntelliJ uses Ctrl+- / Ctrl+=, but Ghostty (like most terminals)
--- keeps those for font size, so Alt is added. Shifted keys are mapped both
--- ways because terminals report Shift+= / Shift+- as either S-= or +, S-- or _.
-map("n", "<C-A-->",   "zc", "Collapse fold (Ctrl+Alt+-)")
-map("n", "<C-A-=>",   "zo", "Expand fold (Ctrl+Alt+=)")
-map("n", "<C-A-S-->", "zM", "Collapse all folds (Ctrl+Alt+Shift+-)")
-map("n", "<C-A-_>",   "zM", "Collapse all folds (Ctrl+Alt+Shift+-)")
-map("n", "<C-A-S-=>", "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
-map("n", "<C-A-+>",   "zR", "Expand all folds (Ctrl+Alt+Shift+=)")
+-- Shortcut finder: search every shortcut by name and run it (F1 = help key;
+-- Ctrl+Shift+A is taken by Ghostty's select-all) — see config/shortcuts.lua
+local shortcuts = function() require("config.shortcuts").open() end
+map({ "n", "i" }, "<F1>",       shortcuts, "Find shortcut / action (F1)")
+map("n",          "<leader>fk", shortcuts, "Find shortcut / action")
 
 -- Bookmarks (IntelliJ F11 / Shift+F11) — see config/bookmarks.lua
 local bookmarks = require("config.bookmarks")
