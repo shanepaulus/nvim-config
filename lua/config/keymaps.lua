@@ -28,6 +28,7 @@ map({ "n", "i" }, "<C-a>", "ggVG", "Select all (Ctrl+A)")
 -- Clipboard (system clipboard set via opt.clipboard = unnamedplus so y/p already sync;
 -- these add IntelliJ Ctrl+C / Ctrl+V muscle memory on top)
 map("v", "<C-c>", '"+y', "Copy to clipboard (Ctrl+C)")
+map("v", "<C-x>", '"+d', "Cut to clipboard (Ctrl+X)")
 map({ "n", "i", "v" }, "<C-v>", '"+p', "Paste from clipboard (Ctrl+V)")
 -- Visual block mode: use Ctrl+V in normal mode (we override Ctrl+V to paste only in insert/visual)
 -- (no separate visual block binding — enter normal mode first, then Ctrl+V works)
