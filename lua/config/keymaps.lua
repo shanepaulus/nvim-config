@@ -133,6 +133,8 @@ map("n", "<esc>", "<cmd>nohlsearch<cr>", "Clear search highlight")
 -- Keep selection after indent (IntelliJ stays in visual after Tab/Shift+Tab)
 map("v", "<", "<gv", "Indent left")
 map("v", ">", ">gv", "Indent right")
+map("x", "<Tab>", ">gv", "Indent right")
+map("x", "<S-Tab>", "<gv", "Indent left")
 
 -- Better up/down on wrapped lines (mostly relevant for markdown/text)
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", "Down", { expr = true })

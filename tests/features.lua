@@ -171,6 +171,36 @@ local function run()
     eq(undotree_open(), false, "open after second toggle")
   end)
 
+  check("Shift+Tab unindents in insert and visual mode", function()
+    require("lazy").load({ plugins = { "nvim-cmp" } }) -- normally loads on InsertEnter
+    local prev = vim.api.nvim_get_current_buf()
+    local b = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_current_buf(b)
+    vim.bo[b].expandtab, vim.bo[b].shiftwidth = true, 2
+    -- cmp installs its insert-mode maps via a callback queued behind pending
+    -- keys (i.e. after our <Esc>), so install them up front.
+    require("cmp").core:prepare()
+    -- flush the pending startinsert left by the telescope popup in "bookmarks: list"
+    vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "nx", false)
+    local function after(keys)
+      vim.api.nvim_buf_set_lines(b, 0, -1, false, { "    foo", "    bar" })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      vim.api.nvim_feedkeys(vim.keycode(keys), "mx", false)
+      local l = vim.api.nvim_buf_get_lines(b, 0, -1, false)
+      return l[1] .. "|" .. l[2]
+    end
+    local results = {
+      insert = after("A<S-Tab><Esc>"),
+      visual_unindent = after("Vj<S-Tab><Esc>"),
+      visual_indent = after("Vj<Tab><Esc>"),
+    }
+    vim.api.nvim_set_current_buf(prev)
+    vim.api.nvim_buf_delete(b, { force = true })
+    eq(results.insert, "  foo|    bar", "insert Shift+Tab")
+    eq(results.visual_unindent, "  foo|  bar", "visual Shift+Tab")
+    eq(results.visual_indent, "      foo|      bar", "visual Tab")
+  end)
+
   -- dropbar attaches on its own autocmds; give it a moment
   vim.defer_fn(function()
     check("breadcrumbs: dropbar sets winbar", function()

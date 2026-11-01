@@ -67,10 +67,13 @@ return {
               fallback()
             end
           end, { "i", "s" }),
-          -- Shift+Tab: jump back in snippet
+          -- Shift+Tab: jump back in snippet, otherwise unindent the line
+          -- (built-in <C-d>, sent unmapped: our <C-d> is duplicate-line)
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
+            elseif vim.fn.mode() == "i" then
+              vim.api.nvim_feedkeys(vim.keycode("<C-d>"), "ni", false)
             else
               fallback()
             end
