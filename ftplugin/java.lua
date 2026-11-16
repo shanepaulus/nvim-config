@@ -179,9 +179,23 @@ local function find_project_root()
     dir = parent
   end
 
-  -- No marker at all: plain Java folder (no build tool, no git). Use the
-  -- file's own directory so jdtls still gives completion/navigation.
-  return gradle_root or maven_root or nearest_build or git_root or file_dir
+  -- No marker at all: plain Java folder (no build tool, no git), e.g. an
+  -- IntelliJ-only project whose source root lives in its .iml. Use the source
+  -- root implied by the `package` line: for com/acme/Demo.java declaring
+  -- `package com.acme;` that's two levels up. Rooting at the file's own folder
+  -- makes jdtls flag every file with
+  --   The declared package "com.acme" does not match the expected package ""
+  local source_root = file_dir
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, 50, false)) do
+    local pkg = line:match("^%s*package%s+([%w_.]+)%s*;")
+    if pkg then
+      for _ in pkg:gmatch("[^.]+") do
+        source_root = vim.fn.fnamemodify(source_root, ":h")
+      end
+      break
+    end
+  end
+  return gradle_root or maven_root or nearest_build or git_root or source_root
 end
 
 local root_dir = find_project_root()
