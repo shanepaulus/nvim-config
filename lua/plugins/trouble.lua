@@ -8,6 +8,8 @@ return {
       { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>",      desc = "Symbols (Trouble)" },
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                  desc = "Location list" },
       { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                   desc = "Quickfix list" },
+      -- IntelliJ: Alt+6 → Problems tool window
+      { "<A-6>", "<cmd>Trouble diagnostics toggle<cr>", mode = { "n", "i" }, desc = "Problems (Alt+6)" },
       -- IntelliJ: F2 → next error / Shift+F2 → prev error
       {
         "<F2>",

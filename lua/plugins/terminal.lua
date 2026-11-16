@@ -2,8 +2,9 @@ return {
   {
     "akinsho/toggleterm.nvim",
     version = "*",
-    -- IntelliJ: Alt+4 → Terminal panel · Alt+T → New terminal tab
-    -- <N>Alt+4 (type a digit first, in Normal mode) jumps to/creates tab N —
+    -- IntelliJ: Alt+F12 → Terminal panel · Alt+T → New terminal tab
+    -- (Alt+4 is IntelliJ's Run window, plugins/dap.lua)
+    -- <N>Alt+F12 (type a digit first, in Normal mode) jumps to/creates tab N —
     -- a fallback that needs no new key chord at all, in case a given chord
     -- gets grabbed by the desktop environment/terminal emulator first (e.g.
     -- Ctrl+Alt+T is Cinnamon's global "open terminal" shortcut, and
@@ -14,7 +15,7 @@ return {
     -- reliably lazy-loads the plugin before dispatching (same pattern as
     -- neo-tree/telescope's <cmd>...<cr> lazy-keys).
     keys = {
-      { "<A-4>", '<Cmd>execute v:count . "TermTogglePanel"<CR>', mode = { "n", "i", "t" }, desc = "Terminal panel (Alt+4, <N>Alt+4 = tab N)" },
+      { "<A-F12>", '<Cmd>execute v:count . "TermTogglePanel"<CR>', mode = { "n", "i", "t" }, desc = "Terminal (Alt+F12, <N>Alt+F12 = tab N)" },
       { "<A-t>", "<cmd>TermNewTab<cr>",                          mode = { "n", "i", "t" }, desc = "New terminal tab (Alt+T)" },
     },
     -- also lazy-load if any of these are typed directly as commands
@@ -27,7 +28,7 @@ return {
           return vim.o.columns * 0.4
         end
       end,
-      -- open_mapping intentionally omitted: <A-4> is fully handled by our
+      -- open_mapping intentionally omitted: <A-F12> is fully handled by our
       -- own TermTogglePanel command (below) so it stays aware of tabs.
       hide_numbers     = true,
       shade_terminals  = true,
@@ -78,8 +79,8 @@ return {
         term_mod.get_or_create_term(id, nil, "horizontal"):open()
       end
 
-      -- count > 0 (from "<N>Alt+4") jumps straight to/creates tab N;
-      -- count == 0 (plain Alt+4) toggles the panel, remembering the last tab.
+      -- count > 0 (from "<N>Alt+F12") jumps straight to/creates tab N;
+      -- count == 0 (plain Alt+F12) toggles the panel, remembering the last tab.
       local function toggle_panel(count)
         if count and count > 0 then
           show_only_tab(count)

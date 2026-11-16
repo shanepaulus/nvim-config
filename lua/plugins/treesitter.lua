@@ -27,10 +27,11 @@ return {
       incremental_selection = {
         enable = true,
         keymaps = {
-          init_selection    = "<C-space>",
-          node_incremental  = "<C-space>",
+          -- IntelliJ Extend / Shrink Selection (Ctrl+W / Ctrl+Shift+W)
+          init_selection    = "<C-w>",
+          node_incremental  = "<C-w>",
           scope_incremental = false,
-          node_decremental  = "<bs>",
+          node_decremental  = "<C-S-w>",
         },
       },
       textobjects = {

@@ -194,6 +194,48 @@ return {
         end
       end
 
+      -- IntelliJ Alt+Enter: offer the fixes for EVERY problem on the cursor
+      -- line. Neovim's default only sends the server the diagnostics under the
+      -- cursor, so with the cursor on `public` in
+      --   public class Triangle extends Shape {}
+      -- "Add unimplemented methods" never shows up.
+      local code_action = function()
+        local mode = vim.api.nvim_get_mode().mode
+        local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+        local diagnostics = {}
+        for _, d in ipairs(vim.diagnostic.get(0, { lnum = lnum })) do
+          if d.user_data and d.user_data.lsp then
+            table.insert(diagnostics, d.user_data.lsp)
+          end
+        end
+        if mode == "v" or mode == "V" or #diagnostics == 0 then
+          return vim.lsp.buf.code_action()
+        end
+        vim.lsp.buf.code_action({ context = { diagnostics = diagnostics } })
+      end
+
+      -- IntelliJ Quick Definition (Ctrl+Shift+I): peek at the definition in a
+      -- popup without leaving the file. bufadd/bufload also handles jdt://
+      -- (library classes), which nvim-jdtls loads through BufReadCmd.
+      local quick_definition = function()
+        vim.lsp.buf.definition({ on_list = function(list)
+          local item = list.items[1]
+          if not item then return end
+          local b = item.bufnr or vim.fn.bufadd(item.filename)
+          vim.fn.bufload(b)
+          local first = math.max(item.lnum - 1, 1)
+          vim.lsp.util.open_floating_preview(
+            vim.api.nvim_buf_get_lines(b, first - 1, first + 20, false),
+            vim.bo[b].filetype,
+            { border = "rounded", focus_id = "quick_definition" }
+          )
+        end })
+      end
+
+      local refactor_this = function()
+        vim.lsp.buf.code_action({ context = { only = { "refactor" } } })
+      end
+
       local goto_definition = function()
         vim.lsp.buf.definition({ on_list = goto_or_pick("Choose Definition") })
       end
@@ -224,18 +266,31 @@ return {
           map("<C-b>",   goto_definition,                         "Go to definition (Ctrl+B)", "i")
           map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)")
           map("<C-A-b>", goto_implementation,                     "Go to implementation (Ctrl+Alt+B)", "i")
+          map("<F4>",    goto_definition,                         "Jump to source (F4)")
+          map("<C-S-b>", vim.lsp.buf.type_definition,             "Go to type declaration (Ctrl+Shift+B)")
+          map("<C-S-b>", vim.lsp.buf.type_definition,             "Go to type declaration (Ctrl+Shift+B)", "i")
           map("<A-F7>",  tb.lsp_references,                       "Find usages (Alt+F7)")
+          map("<C-A-7>", tb.lsp_references,                       "Show usages (Ctrl+Alt+7)")
+          map("<C-S-F7>", vim.lsp.buf.document_highlight,         "Highlight usages in file (Ctrl+Shift+F7)")
+          map("<C-h>",   function() vim.lsp.buf.typehierarchy("subtypes") end, "Type hierarchy (Ctrl+H)")
           map("<C-A-h>",   tb.lsp_incoming_calls,                 "Call hierarchy: callers (Ctrl+Alt+H)")
           map("<C-A-S-h>", tb.lsp_outgoing_calls,                 "Call hierarchy: callees (Ctrl+Alt+Shift+H)")
-          map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)")
-          map("<C-S-i>", vim.lsp.buf.hover,                       "Hover documentation (Ctrl+Shift+I)", "i")
-          map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)")
-          map("<A-CR>",  vim.lsp.buf.code_action,                 "Code action (Alt+Enter)", "i")
+          map("<C-q>",   vim.lsp.buf.hover,                       "Quick documentation (Ctrl+Q)")
+          map("<C-q>",   vim.lsp.buf.hover,                       "Quick documentation (Ctrl+Q)", "i")
+          map("<C-S-i>", quick_definition,                        "Quick definition (Ctrl+Shift+I)")
+          map("<C-S-i>", quick_definition,                        "Quick definition (Ctrl+Shift+I)", "i")
+          map("<C-p>",   vim.lsp.buf.signature_help,              "Parameter info (Ctrl+P)")
+          map("<C-p>",   vim.lsp.buf.signature_help,              "Parameter info (Ctrl+P)", "i")
+          map("<C-S-p>", vim.lsp.buf.hover,                       "Expression type info (Ctrl+Shift+P)")
+          map("<C-S-p>", vim.lsp.buf.hover,                       "Expression type info (Ctrl+Shift+P)", "i")
+          map("<C-F1>",  vim.diagnostic.open_float,               "Show error description (Ctrl+F1)")
+          map("<C-F1>",  vim.diagnostic.open_float,               "Show error description (Ctrl+F1)", "i")
+          map("<A-CR>",  code_action,                             "Code action (Alt+Enter)")
+          map("<A-CR>",  code_action,                             "Code action (Alt+Enter)", "i")
           map("<S-F6>",  vim.lsp.buf.rename,                      "Rename symbol (Shift+F6)")
+          map("<C-A-S-t>", refactor_this,                         "Refactor this (Ctrl+Alt+Shift+T)")
+          map("<C-A-S-t>", refactor_this,                         "Refactor this (Ctrl+Alt+Shift+T)", "v")
           map("<C-F12>", tb.lsp_document_symbols,                 "File structure (Ctrl+F12)")
-          map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)")
-          map("<C-S-o>", tb.lsp_dynamic_workspace_symbols,        "Workspace symbols (Ctrl+Shift+O)", "i")
-          map("<C-S-p>", vim.lsp.buf.signature_help,              "Signature help", "i")
 
           -- mac IntelliJ equivalents (stock macOS keymap); ⌥F7 find usages matches already
           if require("config.util").is_mac() then

@@ -115,8 +115,10 @@ return {
         -- Alt+Left/Right: move to the tab on the left/right (IntelliJ editor tabs)
         { "<A-Left>",  "<cmd>BufferLineCyclePrev<cr>", desc = "Tab on the left (Alt+Left)" },
         { "<A-Right>", "<cmd>BufferLineCycleNext<cr>", desc = "Tab on the right (Alt+Right)" },
+        -- Shift+Alt+Left/Right: IntelliJ previous / next editor tab
+        { "<S-A-Left>",  "<cmd>BufferLineCyclePrev<cr>", mode = { "n", "i" }, desc = "Select previous tab (Shift+Alt+Left)" },
+        { "<S-A-Right>", "<cmd>BufferLineCycleNext<cr>", mode = { "n", "i" }, desc = "Select next tab (Shift+Alt+Right)" },
         { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
-        { "<C-q>",  "<cmd>bdelete<cr>", mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
       }
       if require("config.util").is_mac() then
         -- mac IntelliJ: ⌘W → Close tab

@@ -31,24 +31,36 @@ return {
     opts = {},
   },
 
-  -- Multiple cursors — Ctrl+D: select next occurrence (like IntelliJ/VSCode)
+  -- Multiple carets, IntelliJ keys: Alt+J select next occurrence,
+  -- Alt+Shift+J unselect it, Ctrl+Alt+Shift+J select all occurrences.
   {
     "mg979/vim-visual-multi",
     branch = "master",
     event = "BufReadPost",
     init = function()
       vim.g.VM_maps = {
-        ["Find Under"]         = "<C-d>",
-        ["Find Subword Under"] = "<C-d>",
-        ["Select All"]         = "<C-S-l>",
-        ["Add Cursor Down"]    = "<C-S-Down>",
-        ["Add Cursor Up"]      = "<C-S-Up>",
+        ["Find Under"]         = "<A-j>",
+        ["Find Subword Under"] = "<A-j>",
+        ["Remove Last Region"] = "<A-S-j>",
+        ["Select All"]         = "<C-A-S-j>",
+        -- VM defaults these to Ctrl+Up/Down, IntelliJ's scroll keys
+        ["Add Cursor Down"]    = "",
+        ["Add Cursor Up"]      = "",
         -- free Shift+Left/Right for plain text selection (options.lua keymodel)
         ["Select l"]           = "",
         ["Select h"]           = "",
       }
       vim.g.VM_theme = "iceblue"
       vim.g.VM_highlight_matches = "underline"
+    end,
+    -- Same maps VM creates from VM_maps, re-set with descriptions for F1/which-key.
+    config = function()
+      local map = function(mode, lhs, plug, desc)
+        vim.keymap.set(mode, lhs, plug, { remap = true, desc = desc })
+      end
+      map("n", "<A-j>",     "<Plug>(VM-Find-Under)",         "Select next occurrence (Alt+J)")
+      map("x", "<A-j>",     "<Plug>(VM-Find-Subword-Under)", "Select next occurrence (Alt+J)")
+      map("n", "<C-A-S-j>", "<Plug>(VM-Select-All)",         "Select all occurrences (Ctrl+Alt+Shift+J)")
     end,
   },
 
@@ -71,7 +83,7 @@ return {
   { "b0o/schemastore.nvim", lazy = true },
 
   -- Cycle through word alternatives: true↔false, &&↔||, public↔private↔protected, etc.
-  -- IntelliJ keymap: Shift+Alt+Up/Down/Left/Right/Enter
+  -- Shift+Alt+Enter (Shift+Alt+arrows are IntelliJ's move line / switch tab)
   {
     "AndrewRadev/switch.vim",
     event = "BufReadPost",
@@ -88,11 +100,7 @@ return {
       }
     end,
     keys = {
-      { "<S-A-CR>",    "<cmd>Switch<cr>",        mode = { "n", "i" }, desc = "Switch (apply) (Shift+Alt+Enter)" },
-      { "<S-A-Down>",  "<cmd>Switch<cr>",         mode = { "n", "i" }, desc = "Switch next (Shift+Alt+Down)" },
-      { "<S-A-Up>",    "<cmd>SwitchReverse<cr>",  mode = { "n", "i" }, desc = "Switch prev (Shift+Alt+Up)" },
-      { "<S-A-Right>", "<cmd>Switch<cr>",         mode = { "n", "i" }, desc = "Switch next (Shift+Alt+Right)" },
-      { "<S-A-Left>",  "<cmd>SwitchReverse<cr>",  mode = { "n", "i" }, desc = "Switch prev (Shift+Alt+Left)" },
+      { "<S-A-CR>", "<cmd>Switch<cr>", mode = { "n", "i" }, desc = "Switch (apply) (Shift+Alt+Enter)" },
     },
   },
 }

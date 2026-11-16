@@ -61,18 +61,22 @@ return {
     },
     keys = (function()
       local keys = {
-      -- IntelliJ debug keybindings
-      { "<F5>",   function() require("dap").continue() end,          desc = "Debug: Continue (F5)" },
-      { "<F8>",   function() require("dap").step_over() end,         desc = "Debug: Step Over (F8)" },
-      { "<F7>",   function() require("dap").step_into() end,         desc = "Debug: Step Into (F7)" },
-      { "<S-F8>", function() require("dap").step_out() end,          desc = "Debug: Step Out (Shift+F8)" },
-      { "<F9>",   function() require("dap").toggle_breakpoint() end,  desc = "Debug: Toggle Breakpoint (F9)" },
-      { "<C-F2>", function() require("dap").terminate() end,          desc = "Debug: Stop (Ctrl+F2)" },
-      -- Shift+F9 is intentionally not bound here: this entry just called
-      -- dap.continue(), identical to F5 above, and ftplugin/java.lua already
-      -- binds Shift+F9 per-buffer to a more useful Java-specific "debug
-      -- nearest test" action. Keeping both was pure redundancy — the global
-      -- one never did anything F5 didn't already do.
+      -- IntelliJ debug keybindings. Run / Debug (Shift+F10 / Shift+F9) are
+      -- per-language: ftplugin/java.lua.
+      { "<F9>",     function() require("dap").continue() end,          desc = "Debug: Resume program (F9)" },
+      { "<F8>",     function() require("dap").step_over() end,         desc = "Debug: Step Over (F8)" },
+      { "<F7>",     function() require("dap").step_into() end,         desc = "Debug: Step Into (F7)" },
+      { "<S-F7>",   function() require("dap").step_into() end,         desc = "Debug: Smart Step Into (Shift+F7)" },
+      { "<S-F8>",   function() require("dap").step_out() end,          desc = "Debug: Step Out (Shift+F8)" },
+      { "<A-F9>",   function() require("dap").run_to_cursor() end,     desc = "Debug: Run to Cursor (Alt+F9)" },
+      { "<A-F8>",   function() require("dapui").eval() end, mode = { "n", "v" }, desc = "Debug: Evaluate Expression (Alt+F8)" },
+      { "<C-F8>",   function() require("dap").toggle_breakpoint() end,  desc = "Debug: Toggle Line Breakpoint (Ctrl+F8)" },
+      { "<C-S-F8>", function() require("dap").list_breakpoints(true) end, desc = "Debug: View Breakpoints (Ctrl+Shift+F8)" },
+      { "<C-F5>",   function() require("dap").run_last() end,          desc = "Debug: Rerun (Ctrl+F5)" },
+      { "<C-F2>",   function() require("dap").terminate() end,          desc = "Debug: Stop (Ctrl+F2)" },
+      -- IntelliJ tool windows: Alt+4 → Run (program output) · Alt+5 → Debug
+      { "<A-4>", function() require("dap").repl.toggle() end, mode = { "n", "i" }, desc = "Run window (Alt+4)" },
+      { "<A-5>", function() require("dapui").toggle() end,    mode = { "n", "i" }, desc = "Debug window (Alt+5)" },
       {
         "<leader>dB",
         function()

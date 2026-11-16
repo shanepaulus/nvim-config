@@ -8,6 +8,8 @@ return {
     keys = {
       -- IntelliJ: Ctrl+F12 → File structure popup (aerial provides a sidebar version)
       { "<leader>co", "<cmd>AerialToggle<cr>", desc = "Code outline (Aerial)" },
+      -- IntelliJ: Alt+7 → Structure tool window
+      { "<A-7>", "<cmd>AerialToggle<cr>", mode = { "n", "i" }, desc = "Structure (Alt+7)" },
     },
     opts = {
       backends = { "lsp", "treesitter", "markdown", "asciidoc", "man" },
