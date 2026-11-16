@@ -56,9 +56,7 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     keys = {
       { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
-      -- IntelliJ: Alt+9 → Version Control · Alt+0 → Commit (F4 is Jump to Source)
-      { "<A-9>", "<cmd>LazyGit<cr>", mode = { "n", "i" }, desc = "Version control: LazyGit (Alt+9)" },
-      { "<A-0>", "<cmd>LazyGit<cr>", mode = { "n", "i" }, desc = "Commit: LazyGit (Alt+0)" },
+      { "<F4>", "<cmd>LazyGit<cr>", desc = "LazyGit (F4)" },
     },
     cmd = { "LazyGit" },
   },

@@ -1,31 +1,34 @@
 -- mode "t" included on file-navigation keys so they still work with focus
 -- inside a terminal buffer (toggleterm, Maven/Gradle floats, Claude Code panel)
--- IntelliJ keymap ("XWin Proper Redo"). Ctrl+Shift chords need a terminal
--- that reports them (Ghostty does, via the kitty keyboard protocol) and
--- doesn't bind them itself — see the Ghostty section of the README.
-local go_to_class = function()
-  require("telescope.builtin").lsp_dynamic_workspace_symbols({
-    prompt_title = "Go to Class",
-    symbols = { "class", "interface", "enum", "struct" },
-  })
-end
-
 local keys = {
-  -- IntelliJ: Ctrl+N → Go to class · Ctrl+Shift+N → Go to file ·
-  -- Ctrl+Alt+Shift+N → Go to symbol
-  { "<C-n>", go_to_class, mode = { "n" }, desc = "Go to class (Ctrl+N)" },
+  -- Find file (Ctrl+P — Ctrl+Shift+N is intercepted by the terminal)
+  { "<C-p>", "<cmd>Telescope find_files<cr>",
+    mode = { "n", "i", "t" }, desc = "Find file (Ctrl+P)" },
+  -- IntelliJ: Ctrl+Shift+N → Find File (kept for terminals that pass it through)
   { "<C-S-n>", "<cmd>Telescope find_files<cr>",
-    mode = { "n", "i", "t" }, desc = "Go to file (Ctrl+Shift+N)" },
-  { "<C-A-S-n>", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
-    mode = { "n", "i" }, desc = "Go to symbol (Ctrl+Alt+Shift+N)" },
-  -- IntelliJ: Ctrl+Shift+F → Find in files (Ctrl+F is find in file, keymaps.lua)
+    mode = { "n", "i", "t" }, desc = "Find file (Ctrl+Shift+N)" },
+  -- IntelliJ: Ctrl+Shift+F → Search in project.
+  -- Ctrl+F also bound to the same action: without the Kitty keyboard
+  -- protocol (or an equivalent CSI-u mode), a terminal can't distinguish
+  -- Ctrl+Shift+F from Ctrl+F at the protocol level — both send the same
+  -- byte — so most default Linux terminals (GNOME Terminal, xterm, etc.)
+  -- deliver Ctrl+Shift+F to Neovim as plain <C-f>. Binding both means it
+  -- works everywhere: capable terminals (Kitty/WezTerm/Alacritty) hit
+  -- <C-S-f>, everything else hits <C-f> — same fix pattern as Ctrl+P
+  -- covering for Ctrl+Shift+N above. Ctrl+F is otherwise unused here.
   { "<C-S-f>", "<cmd>Telescope live_grep<cr>",
-    mode = { "n", "i", "t" }, desc = "Find in files (Ctrl+Shift+F)" },
-  -- IntelliJ: Ctrl+E → Recent files · Ctrl+Shift+E → Recent locations
+    mode = { "n", "i", "t" }, desc = "Search in project (Ctrl+Shift+F)" },
+  { "<C-f>", "<cmd>Telescope live_grep<cr>",
+    mode = { "n", "i", "t" }, desc = "Search in project (Ctrl+F, terminals that swallow Shift)" },
+  -- IntelliJ: Ctrl+E → Recent files
   { "<C-e>", "<cmd>Telescope oldfiles<cr>",
     mode = { "n", "i", "t" }, desc = "Recent files (Ctrl+E)" },
-  { "<C-S-e>", "<cmd>Telescope jumplist<cr>",
-    mode = { "n", "i" }, desc = "Recent locations (Ctrl+Shift+E)" },
+  -- IntelliJ: Ctrl+Shift+O → Go to symbol (workspace)
+  { "<C-S-o>", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",
+    mode = { "n", "i" }, desc = "Go to symbol (Ctrl+Shift+O)" },
+  -- IntelliJ: Ctrl+N → Go to class (document symbols)
+  { "<C-n>", "<cmd>Telescope lsp_document_symbols<cr>",
+    mode = { "n" }, desc = "Document symbols (Ctrl+N)" },
   -- Git files
   { "<leader>fg", "<cmd>Telescope git_files<cr>",        desc = "Git files" },
   -- Grep current word

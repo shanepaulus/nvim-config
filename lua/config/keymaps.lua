@@ -17,12 +17,10 @@ end
 -- Save
 map({ "n", "i", "v" }, "<C-s>", "<cmd>w<cr><esc>", "Save (Ctrl+S)")
 
--- Undo / Redo (IntelliJ keymap "XWin Proper Redo": Redo also on Ctrl+Y)
-map({ "n", "i" }, "<C-z>",    "<cmd>undo<cr>", "Undo (Ctrl+Z)")
-map({ "n", "i" }, "<A-BS>",   "<cmd>undo<cr>", "Undo (Alt+Backspace)")
-map({ "n", "i" }, "<C-S-z>",  "<cmd>redo<cr>", "Redo (Ctrl+Shift+Z)")
-map({ "n", "i" }, "<C-y>",    "<cmd>redo<cr>", "Redo (Ctrl+Y)")
-map({ "n", "i" }, "<S-A-BS>", "<cmd>redo<cr>", "Redo (Shift+Alt+Backspace)")
+-- Undo / Redo
+map({ "n", "i" }, "<C-z>",   "<cmd>undo<cr>", "Undo (Ctrl+Z)")
+map({ "n", "i" }, "<C-S-z>", "<cmd>redo<cr>", "Redo (Ctrl+Shift+Z)")
+map({ "n", "i" }, "<C-y>",   "<cmd>redo<cr>", "Redo (Ctrl+Y)")
 
 -- Select all
 map({ "n", "i" }, "<C-a>", "ggVG", "Select all (Ctrl+A)")
@@ -40,102 +38,16 @@ map("n", "<C-d>", "yyp",       "Duplicate line (Ctrl+D)")
 map("i", "<C-d>", "<esc>yypi", "Duplicate line (Ctrl+D)")
 map("v", "<C-d>", "y`>p",      "Duplicate selection (Ctrl+D)")
 
--- Move line (IntelliJ Alt+Shift+Up/Down) and move statement (Ctrl+Shift+Up/Down;
--- moves the line too — no statement-aware move in Neovim).
--- Alt+J is IntelliJ's "select next occurrence" (vim-visual-multi, editor.lua).
-local move_keys = {
-  { "<A-S-Up>",   "<A-S-Down>", "line",      "Alt+Shift" },
-  { "<C-S-Up>",   "<C-S-Down>", "statement", "Ctrl+Shift" },
-}
-for _, k in ipairs(move_keys) do
-  local up, down, what, mods = k[1], k[2], k[3], k[4]
-  map("n", up,   "<cmd>m .-2<cr>==",        "Move " .. what .. " up (" .. mods .. "+Up)")
-  map("i", up,   "<esc><cmd>m .-2<cr>==gi", "Move " .. what .. " up (" .. mods .. "+Up)")
-  map("v", up,   ":m '<-2<cr>gv=gv",        "Move " .. what .. " up (" .. mods .. "+Up)")
-  map("n", down, "<cmd>m .+1<cr>==",        "Move " .. what .. " down (" .. mods .. "+Down)")
-  map("i", down, "<esc><cmd>m .+1<cr>==gi", "Move " .. what .. " down (" .. mods .. "+Down)")
-  map("v", down, ":m '>+1<cr>gv=gv",        "Move " .. what .. " down (" .. mods .. "+Down)")
-end
+-- Move lines — Alt+J/K (Shift+Alt+Up/Down reserved for Switch plugin)
+map("n", "<A-k>", "<cmd>m .-2<cr>==",        "Move line up (Alt+K)")
+map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", "Move line up (Alt+K)")
+map("v", "<A-k>", ":m '<-2<cr>gv=gv",        "Move selection up (Alt+K)")
+map("n", "<A-j>", "<cmd>m .+1<cr>==",        "Move line down (Alt+J)")
+map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", "Move line down (Alt+J)")
+map("v", "<A-j>", ":m '>+1<cr>gv=gv",        "Move selection down (Alt+J)")
 
--- Join lines (IntelliJ Ctrl+Shift+J)
-map({ "n", "v" }, "<C-S-j>", "J",     "Join lines (Ctrl+Shift+J)")
-map("i",          "<C-S-j>", "<C-o>J", "Join lines (Ctrl+Shift+J)")
-
--- Toggle case (IntelliJ Ctrl+Shift+U): word at caret, or the selection
-map("n", "<C-S-u>", "g~iw", "Toggle case (Ctrl+Shift+U)")
-map("v", "<C-S-u>", "~",    "Toggle case (Ctrl+Shift+U)")
-
--- Start new line (IntelliJ Shift+Enter) / new line before (Ctrl+Alt+Enter)
-map("n", "<S-CR>",   "o",      "Start new line (Shift+Enter)")
-map("i", "<S-CR>",   "<C-o>o", "Start new line (Shift+Enter)")
-map("n", "<C-A-CR>", "O",      "Start new line before current (Ctrl+Alt+Enter)")
-map("i", "<C-A-CR>", "<C-o>O", "Start new line before current (Ctrl+Alt+Enter)")
-
--- Auto-indent lines (IntelliJ Ctrl+Alt+I)
-map("n", "<C-A-i>", "==", "Auto-indent lines (Ctrl+Alt+I)")
-map("v", "<C-A-i>", "=",  "Auto-indent lines (Ctrl+Alt+I)")
-
--- Delete to word start / end (IntelliJ Ctrl+Backspace / Ctrl+Delete).
--- <C-w> on the right is Vim's built-in (noremap), not the Ctrl+W map below.
-map("i", "<C-BS>",  "<C-w>",    "Delete to word start (Ctrl+Backspace)")
-map("i", "<C-Del>", "<C-o>dw",  "Delete to word end (Ctrl+Delete)")
-
--- Scroll without moving the caret (IntelliJ Ctrl+Up / Ctrl+Down)
-map("n", "<C-Up>",   "<C-y>",      "Scroll up (Ctrl+Up)")
-map("i", "<C-Up>",   "<C-o><C-y>", "Scroll up (Ctrl+Up)")
-map("n", "<C-Down>", "<C-e>",      "Scroll down (Ctrl+Down)")
-map("i", "<C-Down>", "<C-o><C-e>", "Scroll down (Ctrl+Down)")
-
--- Previous / next method (IntelliJ Alt+Up / Alt+Down): treesitter-textobjects'
--- [m / ]m, so remap = true.
-map("n", "<A-Up>",   "[m", "Previous method (Alt+Up)", { remap = true })
-map("n", "<A-Down>", "]m", "Next method (Alt+Down)",   { remap = true })
-
--- Extend / shrink selection (IntelliJ Ctrl+W / Ctrl+Shift+W): treesitter
--- incremental selection, keys set in plugins/treesitter.lua. Insert mode
--- leaves insert first. Vim's own <C-w> window prefix moves to <leader>w.
-map("i", "<C-w>", "<esc><C-w>", "Extend selection (Ctrl+W)", { remap = true })
-map("n", "<leader>w", "<C-w>", "Window commands (Vim's Ctrl+W)")
-
--- Last edit location (IntelliJ Ctrl+Shift+Backspace)
-map("n", "<C-S-BS>", "g;",      "Last edit location (Ctrl+Shift+Backspace)")
-map("i", "<C-S-BS>", "<esc>g;", "Last edit location (Ctrl+Shift+Backspace)")
-
--- Find / replace in file (IntelliJ Ctrl+F / Ctrl+R, F3 / Shift+F3, Ctrl+L /
--- Ctrl+Shift+L, Ctrl+F3). Project-wide versions live in telescope.lua.
-map("n", "<C-f>", "/",      "Find in file (Ctrl+F)", { silent = false })
-map("i", "<C-f>", "<esc>/", "Find in file (Ctrl+F)", { silent = false })
-local replace_in_file = function()
-  vim.cmd("stopinsert")
-  local word = vim.fn.escape(vim.fn.expand("<cword>"), [[\/]])
-  vim.api.nvim_feedkeys(":%s/\\V" .. word .. "//gc" .. vim.keycode("<Left><Left><Left>"), "n", false)
-end
-map({ "n", "i" }, "<C-r>", replace_in_file, "Replace in file (Ctrl+R)")
--- Replace in files (IntelliJ Ctrl+Shift+R): ripgrep for the text, then
--- :cfdo a confirmed (c) substitution in every hit, like IntelliJ's preview.
-local replace_in_files = function()
-  vim.cmd("stopinsert")
-  local find = vim.fn.input("Replace in files: ", vim.fn.expand("<cword>"))
-  if find == "" then return end
-  local with = vim.fn.input("Replace '" .. find .. "' with: ")
-  local hits = vim.fn.systemlist({ "rg", "--vimgrep", "--fixed-strings", "--", find })
-  if #hits == 0 then
-    vim.notify("Replace in files: no matches for '" .. find .. "'")
-    return
-  end
-  vim.fn.setqflist({}, " ", { title = "Replace in files", lines = hits, efm = "%f:%l:%c:%m" })
-  local esc = function(str) return vim.fn.escape(str, [[\/]]) end
-  vim.cmd("cfdo %s/\\V" .. esc(find) .. "/" .. esc(with) .. "/gce | update")
-end
-map({ "n", "i" }, "<C-S-r>", replace_in_files, "Replace in files (Ctrl+Shift+R)")
-map("n", "<F3>",    "n", "Find next (F3)")
-map("n", "<C-l>",   "n", "Find next (Ctrl+L)")
-map("n", "<S-F3>",  "N", "Find previous (Shift+F3)")
-map("n", "<C-S-l>", "N", "Find previous (Ctrl+Shift+L)")
-map("n", "<C-F3>",  "*", "Find word at caret (Ctrl+F3)")
-
--- Close tab (IntelliJ Ctrl+Shift+F4; Ctrl+F4 is in plugins/ui.lua)
-map({ "n", "i" }, "<C-S-F4>", "<cmd>bdelete<cr>", "Close active tab (Ctrl+Shift+F4)")
+-- Delete line (IntelliJ Ctrl+Shift+D)
+map({ "n", "i" }, "<C-S-d>", "<cmd>d<cr>", "Delete line (Ctrl+Shift+D)")
 
 -- Toggle whitespace visibility (IntelliJ Ctrl+Alt+W)
 map({ "n", "i" }, "<C-A-w>", "<cmd>set list!<cr>", "Toggle whitespace (Ctrl+Alt+W)")
@@ -167,10 +79,9 @@ local goto_line = function()
 end
 map({ "n", "i" }, "<C-g>", goto_line, "Go to line (Ctrl+G)")
 
--- Shortcut finder: search every shortcut by name and run it, like IntelliJ's
--- Find Action (Ctrl+Shift+A; F1 kept as a fallback) — see config/shortcuts.lua
+-- Shortcut finder: search every shortcut by name and run it (F1 = help key;
+-- Ctrl+Shift+A is taken by Ghostty's select-all) — see config/shortcuts.lua
 local shortcuts = function() require("config.shortcuts").open() end
-map({ "n", "i" }, "<C-S-a>",    shortcuts, "Find action (Ctrl+Shift+A)")
 map({ "n", "i" }, "<F1>",       shortcuts, "Find shortcut / action (F1)")
 map("n",          "<leader>fk", shortcuts, "Find shortcut / action")
 
@@ -205,8 +116,11 @@ map("n", "<C-A-Right>", "<C-i>", "Jump forward (Ctrl+Alt+Right)")
 -- call — whichever loaded last silently won, and which-key's health check
 -- (`:checkhealth which-key`) had two conflicting entries to report on.
 
--- Window navigation: Ctrl+H/J/K/L belong to IntelliJ (type hierarchy, live
--- template, commit, find next), so windows use <leader>w + h/j/k/l.
+-- Window navigation (Ctrl+hjkl)
+map("n", "<C-h>", "<C-w>h", "Window left")
+map("n", "<C-l>", "<C-w>l", "Window right")
+map("n", "<C-j>", "<C-w>j", "Window down")
+map("n", "<C-k>", "<C-w>k", "Window up")
 
 -- Terminal mode: double-Escape to return to normal mode
 map("t", "<esc><esc>", "<C-\\><C-n>", "Exit terminal mode")

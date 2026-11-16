@@ -325,147 +325,35 @@ local config = {
     -- autocmd in lua/plugins/lsp.lua, which covers jdtls too. Java-only extras below.
 
     -- ── Java-specific IntelliJ keymaps ─────────────────────────────────────────
-    local action = function(kind)
-      return function()
-        vim.lsp.buf.code_action({ context = { only = { kind } }, apply = true })
-      end
-    end
-    local function nmap_v(lhs, rhs, desc)
-      map(lhs, rhs, desc)
-      map(lhs, rhs, desc, "v")
-    end
-    local function nmap_i(lhs, rhs, desc)
-      map(lhs, rhs, desc)
-      map(lhs, rhs, desc, "i")
-    end
-
     -- IntelliJ: Alt+Insert → Generate (constructors, getters, toString, etc.)
     -- jdtls has no standalone `generate()` function (that name only exists
-    -- under `jdtls.tests`, for generating test scaffolding) — its "generate"
-    -- actions are LSP source code actions, so this opens that menu.
-    nmap_i("<A-Insert>", function()
-      vim.lsp.buf.code_action({ context = { only = { "source.generate", "source.overrideMethods" } } })
-    end, "Generate (Alt+Insert)")
+    -- under `jdtls.tests`, for generating test scaffolding) — its "generate
+    -- constructor/toString/equals&hashCode/delegate" actions are surfaced as
+    -- regular LSP code actions, so this opens the code-action menu.
+    map("<A-Insert>", vim.lsp.buf.code_action, "Generate code (Alt+Insert)")
+    map("<A-Insert>", vim.lsp.buf.code_action, "Generate code (Alt+Insert)", "i")
 
-    -- IntelliJ: Ctrl+I → Implement Methods (all abstract ones, IntelliJ's
-    -- default selection) · Ctrl+O → Override Methods (pick one).
-    -- Ctrl+I is only distinct from Tab in terminals with the kitty keyboard
-    -- protocol (Ghostty); elsewhere this would shadow Tab in Java buffers.
-    local function override_methods(implement)
-      local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-      params.context = { diagnostics = {} }
-      client:request("java/listOverridableMethods", params, function(err, result)
-        local methods = vim.tbl_filter(function(m)
-          return not implement or m.unimplemented
-        end, (not err and result and result.methods) or {})
-        if #methods == 0 then
-          vim.notify(implement and "No methods to implement" or "No methods to override")
-          return
-        end
-        local add = function(selected)
-          client:request("java/addOverridableMethods",
-            { context = params, overridableMethods = selected },
-            function(err2, edit)
-              if edit then vim.lsp.util.apply_workspace_edit(edit, client.offset_encoding) end
-              if err2 then vim.notify(err2.message, vim.log.levels.WARN) end
-            end, bufnr)
-        end
-        if implement then return add(methods) end
-        vim.ui.select(methods, {
-          prompt = "Override Method",
-          format_item = function(m)
-            return string.format("%s(%s)  %s", m.name, table.concat(m.parameters, ", "), m.declaringClass)
-          end,
-        }, function(m) if m then add({ m }) end end)
-      end, bufnr)
-    end
-    nmap_i("<C-i>", function() override_methods(true) end,  "Implement methods (Ctrl+I)")
-    nmap_i("<C-o>", function() override_methods(false) end, "Override methods (Ctrl+O)")
+    -- IntelliJ: Ctrl+Alt+O → Optimize / organize imports
+    map("<C-A-o>", jdtls.organize_imports, "Organize imports (Ctrl+Alt+O)")
+    map("<C-A-o>", jdtls.organize_imports, "Organize imports (Ctrl+Alt+O)", "i")
 
-    -- IntelliJ: Ctrl+Alt+O → Optimize imports
-    nmap_i("<C-A-o>", jdtls.organize_imports, "Optimize imports (Ctrl+Alt+O)")
-
-    -- IntelliJ refactorings. jdtls.extract_* read the selection from the '< '>
-    -- marks, which are only set once visual mode is left.
-    local extract = function(fn)
-      return function()
-        local visual = vim.fn.mode() ~= "n"
-        if visual then vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "nx", false) end
-        fn(visual)
-      end
-    end
-    nmap_v("<C-A-v>", extract(jdtls.extract_variable), "Introduce variable (Ctrl+Alt+V)")
-    nmap_v("<C-A-m>", extract(jdtls.extract_method),   "Extract method (Ctrl+Alt+M)")
-    nmap_v("<C-A-c>", extract(jdtls.extract_constant), "Introduce constant (Ctrl+Alt+C)")
-    nmap_v("<C-A-f>", action("refactor.extract.field"),       "Introduce field (Ctrl+Alt+F)")
-    nmap_v("<C-A-p>", action("refactor.introduce.parameter"), "Introduce parameter (Ctrl+Alt+P)")
-    nmap_v("<C-A-n>", action("refactor.inline"),              "Inline (Ctrl+Alt+N)")
-    map("<F6>",       action("refactor.move"),                "Move (F6)")
-    map("<C-F6>",     action("refactor.change.signature"),    "Change signature (Ctrl+F6)")
-
-    -- Extract refactorings, <leader>j aliases
-    nmap_v("<leader>jv", extract(jdtls.extract_variable), "Extract variable")
-    nmap_v("<leader>jm", extract(jdtls.extract_method),   "Extract method")
-    map("<leader>jc", extract(jdtls.extract_constant), "Extract constant")
-
-    -- IntelliJ: Ctrl+U → Go to super method
-    map("<C-u>", jdtls.super_implementation, "Go to super method (Ctrl+U)")
-
-    -- IntelliJ: Ctrl+Shift+T → Go to test (Foo.java ↔ FooTest.java).
-    -- jdtls.tests.goto_subjects needs the disabled java-test bundle (see above).
-    nmap_i("<C-S-t>", function()
-      local name = vim.fn.expand("%:t:r")
-      local target = (name:match("^(.+)Tests?$") or (name .. "Test")) .. ".java"
-      local found = vim.fs.find(target, { path = root_dir, type = "file", limit = 1 })[1]
-      if found then
-        vim.cmd.edit(vim.fn.fnameescape(found))
-      else
-        vim.notify("Go to test: no " .. target .. " under " .. root_dir)
-      end
-    end, "Go to test (Ctrl+Shift+T)")
-
-    -- IntelliJ run/debug: Ctrl+Shift+F10 → run this file's main() ·
-    -- Shift+F10 → rerun the last run · Shift+F9 → debug (last, or this file).
-    -- Runs go through nvim-dap (java-debug bundle); output shows in the dap
-    -- REPL, IntelliJ's Run window (Alt+4).
-    local function run_this_class(debug)
-      local pkg
-      for _, line in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, 50, false)) do
-        pkg = line:match("^%s*package%s+([%w_.]+)%s*;")
-        if pkg then break end
-      end
-      local main = (pkg and (pkg .. ".") or "") .. vim.fn.expand("%:t:r")
-      local overrides = { noDebug = not debug, console = "internalConsole" }
-      require("jdtls.dap").fetch_main_configs({ config_overrides = overrides }, function(configs)
-        vim.schedule(function()
-          for _, cfg in ipairs(configs) do
-            if cfg.mainClass == main then
-              vim.g.java_last_run = cfg
-              require("dap").run(cfg)
-              if not debug then require("dap").repl.open() end
-              return
-            end
-          end
-          vim.notify("No main() method in " .. main, vim.log.levels.WARN)
-        end)
-      end)
-    end
-    local function rerun(debug)
-      local last = vim.g.java_last_run
-      if not last then return run_this_class(debug) end
-      require("dap").run(vim.tbl_extend("force", last, { noDebug = not debug }))
-      if not debug then require("dap").repl.open() end
-    end
-    if #bundles > 0 then
-      map("<C-S-F10>", function() run_this_class(false) end, "Run this class (Ctrl+Shift+F10)")
-      map("<S-F10>",   function() rerun(false) end,          "Run (Shift+F10)")
-      map("<S-F9>",    function() rerun(true) end,           "Debug (Shift+F9)")
-    end
+    -- Extract refactorings (no direct IntelliJ equivalent, via <leader>j)
+    map("<leader>jv", jdtls.extract_variable, "Extract variable")
+    map("<leader>jv", jdtls.extract_variable, "Extract variable", "v")
+    map("<leader>jm", jdtls.extract_method,   "Extract method")
+    map("<leader>jm", jdtls.extract_method,   "Extract method", "v")
+    map("<leader>jc", jdtls.extract_constant, "Extract constant")
 
     -- Test running (requires vscode-java-test bundle — currently disabled,
     -- see has_test_bundle comment above)
+    -- test_nearest_method runs with DAP attached (noDebug=false by default)
+    -- pass noDebug=true for a plain run without the debugger
     if has_test_bundle then
       local dap = require("jdtls.dap")
+      -- IntelliJ: Shift+F10 → Run test (no debugger)
+      map("<S-F10>", function() dap.test_nearest_method({ config_overrides = { noDebug = true } }) end,  "Run test method (Shift+F10)")
+      -- IntelliJ: Shift+F9 → Debug test (with debugger attached)
+      map("<S-F9>",  function() dap.test_nearest_method() end, "Debug test method (Shift+F9)")
       map("<leader>jt", function() dap.test_nearest_method() end,  "Test nearest method")
       map("<leader>jT", function() dap.test_class() end,           "Test class")
     end

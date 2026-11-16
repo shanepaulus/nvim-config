@@ -145,7 +145,7 @@ Then validate it and **fully quit Ghostty (⌘Q)** and reopen it (new windows al
 /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
 ```
 
-Without `macos-option-as-alt`, Option types characters (`∫` for ⌥B) instead of acting as Alt, so `⌥⌘B`, `Ctrl+Alt+B`, `Alt+J`, `Alt+Enter`, `Alt+F7` all do nothing.
+Without `macos-option-as-alt`, Option types characters (`∫` for ⌥B) instead of acting as Alt, so `⌥⌘B`, `Ctrl+Alt+B`, `Alt+J/K`, `Alt+Enter`, `Alt+F7` all do nothing.
 
 **2. `JAVA_HOME` in `~/.zshrc`** (Homebrew JDK): point it at the real JDK home, **not** `/opt/homebrew/opt/openjdk` (that's a wrapper with only `bin/` symlinks):
 
@@ -184,93 +184,65 @@ Find Action. Ctrl+Shift+A isn't used because Ghostty reserves it for select-all.
 
 Pressing `<leader>` and pausing also pops up which-key with the next available keys.
 
-Keys follow the IntelliJ keymap in use, **"XWin Proper Redo"** (stock Linux "Default for XWin"
-plus Redo on `Ctrl+Y` / `Shift+Alt+Backspace`, Delete Line unbound). `tests/intellij_keymap.lua`
-checks every key below. Vim's own `Ctrl+W` window prefix moved to `<leader>w`.
-
 ### Navigation (IntelliJ-style)
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+B` / `F4` | Go to declaration / jump to source (jumps directly if there is one target, otherwise a pick-list popup at the cursor) |
-| `Ctrl+Alt+B` | Go to implementation |
-| `Ctrl+Shift+B` | Go to type declaration |
-| `Ctrl+U` | Go to super method (Java) |
-| `Ctrl+Shift+T` | Go to test (`Foo.java` ↔ `FooTest.java`, Java) |
-| `Alt+F7` / `Ctrl+Alt+7` | Find usages / show usages |
-| `Ctrl+Shift+F7` | Highlight usages in file |
-| `Ctrl+H` | Type hierarchy (subtypes) |
-| `Ctrl+Alt+H` / `Ctrl+Alt+Shift+H` | Call hierarchy: callers / callees |
-| `Ctrl+Q` | Quick documentation |
-| `Ctrl+Shift+I` | Quick definition (popup) |
-| `Ctrl+P` | Parameter info |
-| `Ctrl+Shift+P` | Expression type info |
-| `Ctrl+F1` | Show error description |
+| `Ctrl+B` | Go to definition (jumps directly if there is one target, otherwise a pick-list popup at the cursor) |
+| `Ctrl+Alt+B` | Go to implementation (jumps directly if there is one, otherwise a pick-list popup at the cursor) |
+| `Alt+F7` | Find usages |
+| `Ctrl+Alt+H` | Call hierarchy: who calls this method |
+| `Ctrl+Alt+Shift+H` | Call hierarchy: what this method calls |
+| `Ctrl+Shift+I` | Hover documentation |
+| `Alt+Enter` | Code action / quick fix |
+| `Shift+F6` | Rename symbol |
 | `Ctrl+F12` | File structure |
-| `Ctrl+N` | Go to class |
-| `Ctrl+Shift+N` | Go to file |
-| `Ctrl+Alt+Shift+N` | Go to symbol |
-| `Ctrl+Shift+A` (or `F1`) | Find action — search every shortcut by name, `Enter` runs it |
-| `Ctrl+E` / `Ctrl+Shift+E` | Recent files / recent locations |
-| `Ctrl+Shift+Backspace` | Last edit location |
-| `Ctrl+G` | Go to line |
-| `Alt+Left` / `Alt+Right` (or `Shift+Alt+Left/Right`) | Previous / next editor tab |
-| `Ctrl+Alt+Left` / `Ctrl+Alt+Right` | Back / forward |
-| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Next / previous buffer |
-| `Ctrl+F4` / `Ctrl+Shift+F4` | Close tab |
+| `Ctrl+Shift+O` | Workspace symbols |
+| `Ctrl+Shift+N` (or `Ctrl+P`) | Find file by name |
+| `Ctrl+N` | Symbols in current file |
+| `Ctrl+Shift+F` (or `Ctrl+F`) | Live grep (search in files) — both bound to the same action, see note below |
+| `Ctrl+E` | Recent files |
+| `Ctrl+G` | Go to line number |
+| `Alt+Left / Alt+Right` | Move to the open tab on the left / right |
+| `Ctrl+Alt+Left / Ctrl+Alt+Right` | Jump back / forward |
+| `Ctrl+Tab / Ctrl+Shift+Tab` | Next / previous buffer |
+| `Ctrl+F4` | Close buffer |
 | `F2` / `Shift+F2` | Next / previous error |
-| `Alt+Up` / `Alt+Down` | Previous / next method |
-| `Alt+Home` | Jump into the breadcrumbs bar (letters pick a segment, `j`/`k` + `Enter` to jump) |
-| `<leader>w` + `h/j/k/l` | Move between split windows (Vim's `Ctrl+W`) |
-
-### Find & replace
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+F` | Find in file |
-| `F3` / `Ctrl+L` | Find next |
-| `Shift+F3` / `Ctrl+Shift+L` | Find previous |
-| `Ctrl+F3` | Find word at caret |
-| `Ctrl+R` | Replace in file (word under cursor, confirm each) |
-| `Ctrl+Shift+F` | Find in files (live grep) |
-| `Ctrl+Shift+R` | Replace in files (ripgrep, confirm each hit) |
+| `Alt+Home` | Jump into the breadcrumbs bar (letters pick a segment, `j`/`k` + `Enter` to jump). Clicking a segment also works |
+| `]m` / `[m` | Next / previous method (`]]` / `[[` for class) |
+| `Ctrl+H/J/K/L` | Move between split windows |
 
 ### Editor
 
 | Key | Action |
 |-----|--------|
 | `Ctrl+S` | Save |
-| `Ctrl+Z` / `Alt+Backspace` | Undo |
-| `Ctrl+Shift+Z` / `Ctrl+Y` / `Shift+Alt+Backspace` | Redo |
-| `Ctrl+D` | Duplicate line or selection |
+| `Ctrl+Z` | Undo |
+| `Ctrl+Y` / `Ctrl+Shift+Z` | Redo |
+| `Ctrl+D` | Insert mode: duplicate line. Normal mode: select next occurrence (multi-cursor, see below) |
+| `Ctrl+Shift+D` | Delete line |
 | `Ctrl+/` | Toggle comment |
 | `Ctrl+A` | Select all |
 | `Shift+Arrows` | Select text (Normal or Insert mode); plain arrows end the selection |
-| `Ctrl+C` / `Ctrl+X` (visual) | Copy / cut to clipboard |
+| `Ctrl+C` (visual) | Copy to clipboard |
+| `Ctrl+X` (visual) | Cut to clipboard |
 | `Ctrl+V` | Paste from clipboard |
-| `Alt+Shift+Up` / `Alt+Shift+Down` | Move line up / down |
-| `Ctrl+Shift+Up` / `Ctrl+Shift+Down` | Move statement up / down (moves the line) |
-| `Ctrl+Shift+J` | Join lines |
-| `Ctrl+Shift+U` | Toggle case |
-| `Shift+Enter` / `Ctrl+Alt+Enter` | Start new line / new line before current |
-| `Ctrl+Backspace` / `Ctrl+Delete` | Delete to word start / end |
-| `Ctrl+Up` / `Ctrl+Down` | Scroll without moving the caret |
-| `Ctrl+W` / `Ctrl+Shift+W` | Extend / shrink selection |
-| `Ctrl+Alt+L` | Reformat code |
-| `Ctrl+Alt+I` | Auto-indent lines |
-| `Ctrl+Space` | Code completion |
+| `Ctrl+Q` | Close buffer |
+| `Alt+J / Alt+K` | Move line down / up |
 | `Ctrl+Alt+W` | Toggle whitespace visibility |
-| `<leader>uu` | Local History: undo tree of every change, survives restarts. `j`/`k` previews, `Ctrl+S` keeps that version |
-| `Shift+Alt+Enter` | Cycle alternatives (true↔false, &&↔\|\|, etc.) |
+| `Ctrl+Alt+L` | Format file |
+| `Ctrl+Space` / `Backspace` | Extend / shrink selection by syntax node |
+| `<leader>uu` | Local History: undo tree of every change, survives restarts. `j`/`k` previews, `Ctrl+L` back to the file, `Ctrl+S` keeps that version |
+| `Shift+Alt+Enter/Up/Down/Left/Right` | Cycle alternatives (true↔false, &&↔\|\|, etc.) |
 
-### Multiple carets
+### Multi-cursor
 
 | Key | Action |
 |-----|--------|
-| `Alt+J` | Select word, press again to add the next occurrence |
-| `Alt+Shift+J` | Unselect the last occurrence |
-| `Ctrl+Alt+Shift+J` | Select all occurrences |
-| `Esc` | Back to a single caret |
+| `Ctrl+D` (Normal) | Select word, press again to add the next occurrence |
+| `Ctrl+Shift+L` | Select all occurrences |
+| `Ctrl+Shift+Up` / `Ctrl+Shift+Down` | Add cursor above / below |
+| `Esc` | Back to a single cursor |
 
 ### Bookmarks (IntelliJ-style)
 
@@ -285,39 +257,40 @@ their number in the gutter.
 | `Shift+F11` | List all bookmarks with preview |
 | `:BookmarksClear` | Remove all bookmarks |
 
-
 ### Search (`<leader>f`)
 
 | Key | Action |
 |-----|--------|
-| `<leader>fk` | Find action (same as `Ctrl+Shift+A`) |
+| `<leader>fk` | Find shortcut / action (same as F1) |
 | `<leader>fg` | Git-tracked files |
 | `<leader>fw` | Grep word under cursor |
 | `<leader>fb` | Open buffers |
 | `<leader>fd` | Diagnostics |
 | `<leader>fc` | Command history |
 
-### Tool windows
+### Problems & structure
 
 | Key | Action |
 |-----|--------|
-| `Alt+1` | Project (neo-tree) |
-| `Alt+4` | Run window (program output) |
-| `Alt+5` | Debug window (dap-ui) |
-| `Alt+6` | Problems (Trouble) |
-| `Alt+7` | Structure (Aerial) |
-| `Alt+9` / `Alt+0` | Version control / commit (LazyGit) |
-| `Alt+F12` | Terminal panel (remembers last tab) |
-| `<N>Alt+F12` | Jump to/create terminal tab N (type the digit first in Normal mode) |
-| `<leader>xx` / `<leader>xX` | All / current-file diagnostics (Trouble) |
+| `<leader>xx` | All diagnostics (Trouble) |
+| `<leader>xX` | Current-file diagnostics |
 | `<leader>xQ` / `<leader>xL` | Quickfix / location list |
-| `<leader>cs` / `<leader>co` | Symbols panel (Trouble) / code outline (Aerial) |
+| `<leader>cs` | Symbols panel (Trouble) |
+| `<leader>co` | Code outline (Aerial) |
+
+### Panels
+
+| Key | Action |
+|-----|--------|
+| `Alt+1` | Toggle file explorer (neo-tree) |
+| `Alt+4` | Toggle terminal panel (opens at the bottom, remembers last tab) |
+| `<N>Alt+4` | Jump to/create terminal tab N (type the digit first in Normal mode, e.g. `2` then `Alt+4`) |
 
 ### Git Workflow (IntelliJ-style)
 
 | Key | Action |
 |-----|--------|
-| `Alt+9` / `Alt+0` (or `<leader>gg`) | Open LazyGit (IntelliJ Version Control / Commit) |
+| `F4` (or `<leader>gg`) | Open LazyGit |
 | `<leader>ga` | Annotate — persistent per-line blame column (`:Git blame`, IntelliJ "Annotate") |
 | `<leader>gb` | Blame current line (popup) |
 | `<leader>gtb` | Toggle live current-line blame (virtual text) |
@@ -330,7 +303,7 @@ their number in the gutter.
 | `<leader>gu` | Undo stage hunk |
 | `<leader>gd` | Diff this file |
 
-**Committing (inside LazyGit, `Alt+0`):**
+**Committing (inside LazyGit, `F4`):**
 1. `space` on a file in the Files panel — stage/unstage it (`a` stages all)
 2. `c` — commit message prompt, `Enter` to confirm
 3. `P` — push, `p` — pull
@@ -355,42 +328,32 @@ The terminal panel opens as a horizontal split at the bottom of the window, with
 
 `Ctrl+Alt+T` was deliberately avoided for "new tab" — it's Cinnamon's (and some other Linux DEs') global "open terminal" shortcut and never reaches Neovim.
 
-### Run & debug
+### Debugging (DAP)
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+Shift+F10` | Run this file's `main()` (Java) — output in the Run window |
-| `Shift+F10` | Run again (last run, or this file) |
-| `Shift+F9` | Debug (last run, or this file) |
-| `Ctrl+F5` | Rerun last debug session |
-| `F9` | Resume program |
-| `F8` / `F7` / `Shift+F7` / `Shift+F8` | Step over / into / smart step into / out |
-| `Alt+F9` | Run to cursor |
-| `Alt+F8` | Evaluate expression |
-| `Ctrl+F8` | Toggle line breakpoint |
-| `Ctrl+Shift+F8` | View breakpoints |
+| `F9` | Toggle breakpoint |
+| `F5` | Continue |
+| `F8` | Step over |
+| `F7` | Step into |
+| `Shift+F8` | Step out |
 | `Ctrl+F2` | Stop |
-| `<leader>dB` / `<leader>dl` | Conditional breakpoint / log point |
-| `<leader>dr` / `<leader>du` | REPL / toggle debug UI |
+| `<leader>dB` | Conditional breakpoint |
+| `<leader>dl` | Log point |
+| `<leader>dr` | REPL |
+| `<leader>du` | Toggle debug UI |
 
 ### Java-specific
 
 | Key | Action |
 |-----|--------|
-| `Alt+Enter` | Show intention actions — fixes for every problem on the line (e.g. "Add unimplemented methods") |
-| `Ctrl+I` | Implement methods (all abstract ones) |
-| `Ctrl+O` | Override methods |
-| `Alt+Insert` | Generate (constructors, getters, toString, …) |
-| `Ctrl+Alt+O` | Optimize imports |
-| `Ctrl+Alt+V` / `Ctrl+Alt+M` / `Ctrl+Alt+C` | Introduce variable / extract method / introduce constant |
-| `Ctrl+Alt+F` / `Ctrl+Alt+P` | Introduce field / parameter |
-| `Ctrl+Alt+N` | Inline |
-| `F6` / `Ctrl+F6` | Move / change signature |
-| `Shift+F6` | Rename |
-| `Ctrl+Alt+Shift+T` | Refactor this |
-
-Plain Java folders without Maven/Gradle/git (e.g. an IntelliJ-only project) are rooted at the
-source root implied by the file's `package` line, so packages resolve like in IntelliJ.
+| `Shift+F10` | Run nearest test |
+| `Shift+F9` | Debug nearest test |
+| `Alt+Insert` | Generate code (constructors, getters, etc.) |
+| `Ctrl+Alt+O` | Organize imports |
+| `<leader>jv` | Extract variable |
+| `<leader>jm` | Extract method |
+| `<leader>jc` | Extract constant |
 
 ### AI (`<leader>c`)
 
@@ -443,7 +406,7 @@ On macOS the config additionally registers Cmd-based shortcuts mirroring the **s
 | `⌘1` | Toggle file explorer |
 | `⌘F2` | Debug: stop |
 
-Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `Alt+J`, `Alt+1`, `Alt+4`, `Alt+T`, `Alt+Enter`, `Alt+F7`), and Ghostty's own ⌘ bindings must be released for the chords Neovim needs:
+Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `Alt+J/K`, `Alt+1`, `Alt+4`, `Alt+T`, `Alt+Enter`, `Alt+F7`), and Ghostty's own ⌘ bindings must be released for the chords Neovim needs:
 
 ```
 macos-option-as-alt = true
@@ -504,7 +467,7 @@ live in an `LspAttach` autocmd in `lua/plugins/lsp.lua`, so they apply to every 
 `basedpyright`, `ts_ls` and `roslyn_ls` configs define an `on_attach` that silently replaces it (Python, JS/TS/Vue and
 C# lost every LSP shortcut that way). Check a buffer with `:verbose nmap <C-b>`.
 
-**⌥ shortcuts (Alt+J, Ctrl+Alt+B, ⌥⌘B) do nothing on macOS:** Ghostty is missing
+**⌥ shortcuts (Alt+J/K, Ctrl+Alt+B, ⌥⌘B) do nothing on macOS:** Ghostty is missing
 `macos-option-as-alt = true` (see "macOS (Ghostty)" above). Validate the config with
 `/Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config`, then fully quit and reopen Ghostty.
 
@@ -524,23 +487,12 @@ rm -rf ~/.cache/nvim/luac
 Then restart Neovim. Stale bytecode cache.
 
 **Ctrl+Shift / Ctrl+Alt shortcuts not working in terminal:**
-Two causes. (1) Without the Kitty keyboard protocol a terminal sends `Ctrl+Shift+F` as plain `Ctrl+F` (and `Ctrl+I` as `Tab`); Ghostty, Kitty, WezTerm and Alacritty send the full chord. (2) The terminal binds the chord itself and never passes it on. Ghostty does that by default for `Ctrl+Shift+F/N/T/E/O/I/A/J/P/W/Enter`, `Ctrl+Shift+Left/Right`, `Ctrl+Tab`, `Ctrl+Alt+arrows` and `Ctrl+Alt+Shift+J`, so on Linux `~/.config/ghostty/config.ghostty` unbinds them and moves Ghostty's actions to Super:
+Without the Kitty keyboard protocol (or an equivalent CSI-u mode), a terminal can't distinguish e.g. `Ctrl+Shift+F` from `Ctrl+F` at the protocol level — both send the identical byte — so most default Linux terminals (GNOME Terminal, xterm, etc.) deliver the plain, un-shifted combo to Neovim instead. Terminals known to send the full combo correctly: WezTerm, Alacritty, Kitty.
 
-```
-keybind = ctrl+shift+f=unbind          # …one line per chord above
-keybind = super+t=new_tab
-keybind = super+n=new_window
-keybind = super+w=close_tab:this
-keybind = super+f=start_search
-keybind = super+p=toggle_command_palette
-keybind = super+o=new_split:right
-keybind = super+e=new_split:down
-```
+Where this bites, the fix used in this config is to bind the same action to both the "real" IntelliJ chord and its Shift-stripped fallback (e.g. `Ctrl+Shift+F` and `Ctrl+F` both trigger live grep; `Ctrl+Shift+N` and `Ctrl+P` both trigger find-file) so it works everywhere regardless of terminal capability. If you hit a shortcut in this README that doesn't have a fallback yet and isn't working, that's the same root cause — either switch to a terminal with full keyboard-protocol support, or add a `<C-x>`-style fallback mapping next to the `<C-S-x>` one in the relevant `lua/plugins/*.lua` file.
 
-Ghostty's font-size keys (`Ctrl+=`, `Ctrl+-`, `Ctrl+0`) are left alone, so IntelliJ's `Ctrl+0` (bookmark 0) and `Ctrl+=`/`Ctrl+-` (expand/collapse) don't reach Neovim.
-
-**Find in files (`Ctrl+Shift+F`) or replace in files (`Ctrl+Shift+R`) does nothing:**
-This is a missing `ripgrep` install, not a keybinding problem. `find_files` (`Ctrl+Shift+N`) falls back through `rg` → `fd` → plain `find`, and `find` is always present on Linux — so it silently keeps working even without `rg`. `live_grep` has no such fallback; it hard-requires `rg` and just does nothing without it. Check with:
+**Global search (`Ctrl+Shift+F`/`Ctrl+F`) does nothing, but find-file (`Ctrl+P`) works fine:**
+This is a missing `ripgrep` install, not a keybinding problem. `find_files` (`Ctrl+P`) falls back through `rg` → `fd` → plain `find`, and `find` is always present on Linux — so it silently keeps working even without `rg`. `live_grep` has no such fallback; it hard-requires `rg` and just does nothing without it. Check with:
 ```bash
 rg --version
 ```
