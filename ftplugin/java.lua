@@ -150,7 +150,8 @@ end
 -- the enclosing git repo so an unrelated build file further up the filesystem
 -- can never capture the project.
 local function find_project_root()
-  local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":p:h")
+  local file_dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":p:h")
+  local dir = file_dir
   local function has(d, name)
     return vim.uv.fs_stat(d .. "/" .. name) ~= nil
   end
@@ -178,18 +179,12 @@ local function find_project_root()
     dir = parent
   end
 
-  return gradle_root or maven_root or nearest_build or git_root
+  -- No marker at all: plain Java folder (no build tool, no git). Use the
+  -- file's own directory so jdtls still gives completion/navigation.
+  return gradle_root or maven_root or nearest_build or git_root or file_dir
 end
 
 local root_dir = find_project_root()
-if not root_dir then
-  vim.notify(
-    "jdtls: no project root found (looked for build.gradle(.kts)/pom.xml/.git/mvnw/gradlew).\n"
-      .. "Not starting jdtls for a standalone file.",
-    vim.log.levels.WARN
-  )
-  return
-end
 
 -- Per-project workspace cache. Keyed off root_dir rather than getcwd(): the
 -- cwd depends on where nvim happened to be launched, so the same project
