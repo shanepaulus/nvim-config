@@ -105,9 +105,10 @@ local local_history = function()
 end
 map("n", "<leader>uu", local_history, "Local history (undo tree)")
 
--- Jump back / forward (IntelliJ Alt+Left / Alt+Right)
-map("n", "<A-Left>",  "<C-o>", "Jump back (Alt+Left)")
-map("n", "<A-Right>", "<C-i>", "Jump forward (Alt+Right)")
+-- Jump back / forward (IntelliJ Ctrl+Alt+Left / Ctrl+Alt+Right).
+-- Alt+Left/Right belong to bufferline (move between open tabs), plugins/ui.lua.
+map("n", "<C-A-Left>",  "<C-o>", "Jump back (Ctrl+Alt+Left)")
+map("n", "<C-A-Right>", "<C-i>", "Jump forward (Ctrl+Alt+Right)")
 
 -- Buffer navigation (IntelliJ Ctrl+Tab / Ctrl+Shift+Tab / Ctrl+F4 / Ctrl+Q):
 -- owned by bufferline's `keys` spec in plugins/ui.lua, not duplicated here.

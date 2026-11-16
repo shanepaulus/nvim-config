@@ -203,7 +203,8 @@ Pressing `<leader>` and pausing also pops up which-key with the next available k
 | `Ctrl+Shift+F` (or `Ctrl+F`) | Live grep (search in files) — both bound to the same action, see note below |
 | `Ctrl+E` | Recent files |
 | `Ctrl+G` | Go to line number |
-| `Alt+Left / Alt+Right` | Jump back / forward |
+| `Alt+Left / Alt+Right` | Move to the open tab on the left / right |
+| `Ctrl+Alt+Left / Ctrl+Alt+Right` | Jump back / forward |
 | `Ctrl+Tab / Ctrl+Shift+Tab` | Next / previous buffer |
 | `Ctrl+F4` | Close buffer |
 | `F2` / `Shift+F2` | Next / previous error |

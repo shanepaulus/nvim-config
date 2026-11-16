@@ -112,6 +112,9 @@ return {
       local keys = {
         { "<C-Tab>",   "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer (Ctrl+Tab)" },
         { "<C-S-Tab>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer (Ctrl+Shift+Tab)" },
+        -- Alt+Left/Right: move to the tab on the left/right (IntelliJ editor tabs)
+        { "<A-Left>",  "<cmd>BufferLineCyclePrev<cr>", desc = "Tab on the left (Alt+Left)" },
+        { "<A-Right>", "<cmd>BufferLineCycleNext<cr>", desc = "Tab on the right (Alt+Right)" },
         { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
         { "<C-q>",  "<cmd>bdelete<cr>", mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
       }
