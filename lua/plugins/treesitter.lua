@@ -23,7 +23,9 @@ return {
       -- languages listed above).
       auto_install = true,
       highlight = { enable = true, additional_vim_regex_highlighting = false },
-      indent = { enable = true },
+      -- YAML: treesitter indent drops to column 0 after `key:`; Vim's own
+      -- indent/yaml.vim indents nested keys correctly.
+      indent = { enable = true, disable = { "yaml" } },
       incremental_selection = {
         enable = true,
         keymaps = {
