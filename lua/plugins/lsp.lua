@@ -90,6 +90,8 @@ return {
         -- DAP adapters
         "java-debug-adapter",
         "java-test",
+        -- Spring Boot LS: application.yml/.properties completion (spring-boot.lua)
+        "vscode-spring-boot-tools",
         "debugpy",
         "go-debug-adapter",
         "js-debug-adapter",

@@ -102,6 +102,13 @@ if debug_jar ~= "" then
   table.insert(bundles, debug_jar)
 end
 
+-- Spring Boot jdtls extension: hands the project classpath to the Spring Boot
+-- LS so application.yml/.properties complete the project's own properties.
+local sb_ok, spring_boot = pcall(require, "spring_boot")
+if sb_ok then
+  vim.list_extend(bundles, spring_boot.java_extensions())
+end
+
 -- vscode-java-test (Mason's "java-test" package, currently pinned to 0.45.0)
 -- is DISABLED: its com.microsoft.java.test.plugin bundle requires
 -- org.objectweb.asm in range [9.9.0,9.10.0), but jdtls v1.60.0 ships
