@@ -70,8 +70,19 @@ return {
         build = "make",
         cond = function() return vim.fn.executable("make") == 1 end,
       },
+      "nvim-telescope/telescope-ui-select.nvim",
     },
     keys = keys,
+    init = function()
+      -- Code actions (Alt+Enter) etc. go through vim.ui.select. The builtin
+      -- falls back to inputlist(), which noice renders as a "Confirm" popup
+      -- that ignores typed numbers. Load Telescope on first use and let its
+      -- ui-select extension replace this stub.
+      vim.ui.select = function(...)
+        require("lazy").load({ plugins = { "telescope.nvim" } })
+        return vim.ui.select(...)
+      end
+    end,
     opts = {
       defaults = {
         prompt_prefix = " ",
@@ -114,8 +125,11 @@ return {
     },
     config = function(_, opts)
       local telescope = require("telescope")
+      -- Small popup at the cursor, like IntelliJ's Alt+Enter menu.
+      opts.extensions["ui-select"] = { require("telescope.themes").get_cursor() }
       telescope.setup(opts)
       pcall(telescope.load_extension, "fzf")
+      telescope.load_extension("ui-select")
     end,
   },
 }
