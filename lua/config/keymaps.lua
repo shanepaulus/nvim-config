@@ -15,7 +15,7 @@ end
 -- ============================================================
 
 -- Save
-map({ "n", "i", "v" }, "<C-s>", "<cmd>w<cr><esc>", "Save (Ctrl+S)")
+map({ "n", "i", "v" }, "<C-s>", "<cmd>w<cr>", "Save (Ctrl+S)")
 
 -- Undo / Redo
 map({ "n", "i" }, "<C-z>",   "<cmd>undo<cr>", "Undo (Ctrl+Z)")
@@ -145,7 +145,7 @@ map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", "Up",   { expr = true })
 -- keyboard protocol — see the "macOS (Ghostty)" README section.
 -- ============================================================
 if require("config.util").is_mac() then
-  map({ "n", "i", "v" }, "<D-s>", "<cmd>w<cr><esc>", "Save (⌘S)")
+  map({ "n", "i", "v" }, "<D-s>", "<cmd>w<cr>", "Save (⌘S)")
   map({ "n", "i" }, "<D-z>",   "<cmd>undo<cr>", "Undo (⌘Z)")
   map({ "n", "i" }, "<D-S-z>", "<cmd>redo<cr>", "Redo (⇧⌘Z)")
   map({ "n", "i" }, "<D-a>", "ggVG", "Select all (⌘A)")
