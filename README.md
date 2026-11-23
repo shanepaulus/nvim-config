@@ -605,7 +605,7 @@ see the dependency table above).
         ├── completion.lua    # nvim-cmp + LuaSnip
         ├── dap.lua           # Debug adapter + UI
         ├── editor.lua        # autopairs, surround, multi-cursor, comments
-        ├── formatter.lua     # conform.nvim (google-java-format, prettier, etc.)
+        ├── formatter.lua     # conform.nvim (palantir-java-format, prettier, etc.)
         ├── git.lua           # gitsigns + lazygit + vim-fugitive (Annotate)
         ├── lsp.lua           # Mason + lspconfig (all non-Java LSPs)
         ├── neo-tree.lua      # File explorer

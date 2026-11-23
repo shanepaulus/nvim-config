@@ -81,7 +81,7 @@ return {
     opts = {
       ensure_installed = {
         -- Formatters
-        "google-java-format",
+        "palantir-java-format", -- IntelliJ-like: 4-space, 120 cols, compact lambdas/anon classes
         "prettier",
         "black",
         "goimports",

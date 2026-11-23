@@ -19,7 +19,7 @@ return {
     end)(),
     opts = {
       formatters_by_ft = {
-        java       = { "google-java-format" },
+        java       = { "palantir-java-format" },
         go         = { "goimports" },
         python     = { "black" },
         javascript = { "prettier" },
@@ -50,10 +50,6 @@ return {
         lsp_format = "fallback",
       },
       formatters = {
-        ["google-java-format"] = {
-          -- AOSP style = 4-space indent (matches IntelliJ default, not Google's 2-space)
-          prepend_args = { "--aosp" },
-        },
         shfmt = {
           prepend_args = { "-i", "4" },
         },

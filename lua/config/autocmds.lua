@@ -55,7 +55,7 @@ autocmd("BufWritePre", {
   end,
 })
 
--- Java: 4-space indent (explicit, matches google-java-format --aosp)
+-- Java: 4-space indent (explicit, matches palantir-java-format)
 autocmd("FileType", {
   group = augroup("ft_java", { clear = true }),
   pattern = "java",
