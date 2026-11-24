@@ -280,7 +280,9 @@ local config = {
           "com.sun.*", "io.micrometer.shaded.*",
           "java.awt.*", "jdk.*", "sun.*",
         },
-        guessMethodArguments = true,
+        -- "off": Enter leaves the cursor inside the parens in insert mode.
+        -- true guessed args (e.g. `null`) and dropped into select mode on them.
+        guessMethodArguments = "off",
       },
       sources = {
         organizeImports = {
