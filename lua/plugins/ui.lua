@@ -115,12 +115,12 @@ return {
         -- Alt+Left/Right: move to the tab on the left/right (IntelliJ editor tabs)
         { "<A-Left>",  "<cmd>BufferLineCyclePrev<cr>", desc = "Tab on the left (Alt+Left)" },
         { "<A-Right>", "<cmd>BufferLineCycleNext<cr>", desc = "Tab on the right (Alt+Right)" },
-        { "<C-F4>", "<cmd>bdelete<cr>", desc = "Close buffer (Ctrl+F4)" },
-        { "<C-q>",  "<cmd>bdelete<cr>", mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
+        { "<C-F4>", function() Snacks.bufdelete() end, desc = "Close buffer (Ctrl+F4)" },
+        { "<C-q>",  function() Snacks.bufdelete() end, mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
       }
       if require("config.util").is_mac() then
         -- mac IntelliJ: ⌘W → Close tab
-        table.insert(keys, { "<D-w>", "<cmd>bdelete<cr>", desc = "Close buffer (⌘W)" })
+        table.insert(keys, { "<D-w>", function() Snacks.bufdelete() end, desc = "Close buffer (⌘W)" })
       end
       return keys
     end)(),
@@ -128,8 +128,8 @@ return {
       options = {
         mode = "buffers",
         numbers = "none",
-        close_command = "bdelete! %d",
-        right_mouse_command = "bdelete! %d",
+        close_command = function(n) Snacks.bufdelete(n) end,
+        right_mouse_command = function(n) Snacks.bufdelete(n) end,
         diagnostics = "nvim_lsp",
         diagnostics_indicator = function(_, _, diag)
           local icons = { error = " ", warning = " " }

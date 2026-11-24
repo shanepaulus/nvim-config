@@ -161,7 +161,7 @@ if require("config.util").is_mac() then
   map({ "n", "i" }, "<D-l>", goto_line, "Go to line (⌘L)")
   map("n", "<D-[>", "<C-o>", "Jump back (⌘[)")
   map("n", "<D-]>", "<C-i>", "Jump forward (⌘])")
-  map({ "n", "i" }, "<D-w>", "<cmd>bdelete<cr>", "Close buffer (⌘W)")
+  map({ "n", "i" }, "<D-w>", function() Snacks.bufdelete() end, "Close buffer (⌘W)")
   map({ "n", "i" }, "<F3>",    bookmarks.toggle, "Toggle bookmark (F3)")
   map({ "n", "i" }, "<D-F3>",  bookmarks.list,   "Show bookmarks (⌘F3)")
 end
