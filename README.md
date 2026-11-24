@@ -126,6 +126,12 @@ This repo only syncs `~/.config/nvim`. On every new Mac, set up these two by han
 ```
 macos-option-as-alt = true
 
+# Font: match the Linux setup (JetBrains Mono ships inside Ghostty, nothing to install).
+# font-thicken brings macOS's thinner rendering closer to Linux; drop it if too bold.
+font-family = JetBrains Mono
+font-size = 13
+font-thicken = true
+
 # Release Ghostty defaults that collide with the IntelliJ-style maps:
 # new split, close surface, select all, search selection (⌘E), prev/next split, goto tab 1 (⌘1).
 # Ghostty rejects trailing comments on a line, so keep comments on their own lines.
@@ -410,6 +416,12 @@ Required `~/.config/ghostty/config` on the Mac — Option must act as Alt (for `
 
 ```
 macos-option-as-alt = true
+
+# Font: match the Linux setup (JetBrains Mono ships inside Ghostty, nothing to install).
+# font-thicken brings macOS's thinner rendering closer to Linux; drop it if too bold.
+font-family = JetBrains Mono
+font-size = 13
+font-thicken = true
 
 # Release Ghostty defaults that collide with the IntelliJ-style maps:
 # new split, close surface, select all, search selection (⌘E), prev/next split, goto tab 1 (⌘1).
