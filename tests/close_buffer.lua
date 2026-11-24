@@ -27,7 +27,7 @@ local function name() return vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":
 
 local dir = vim.fn.tempname()
 vim.fn.mkdir(dir, "p")
-for _, f in ipairs({ "a.txt", "b.txt" }) do
+for _, f in ipairs({ "a.txt", "b.txt", "c.txt" }) do
   vim.fn.writefile({ f }, dir .. "/" .. f)
   vim.cmd.edit(dir .. "/" .. f)
 end
@@ -37,6 +37,12 @@ vim.cmd("topleft vertical 30new")
 local sidebar = vim.api.nvim_get_current_win()
 vim.cmd.wincmd("l")
 local editor = vim.api.nvim_get_current_win()
+
+check("Ctrl+F4 in insert mode closes the file", function()
+  press("i<C-F4>")
+  eq(name(), "b.txt", "file shown")
+  vim.cmd("stopinsert")
+end)
 
 check("Ctrl+F4 keeps the editor window and shows another file", function()
   press("<C-F4>")

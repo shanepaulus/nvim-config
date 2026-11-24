@@ -115,7 +115,7 @@ return {
         -- Alt+Left/Right: move to the tab on the left/right (IntelliJ editor tabs)
         { "<A-Left>",  "<cmd>BufferLineCyclePrev<cr>", desc = "Tab on the left (Alt+Left)" },
         { "<A-Right>", "<cmd>BufferLineCycleNext<cr>", desc = "Tab on the right (Alt+Right)" },
-        { "<C-F4>", function() Snacks.bufdelete() end, desc = "Close buffer (Ctrl+F4)" },
+        { "<C-F4>", function() Snacks.bufdelete() end, mode = { "n", "i" }, desc = "Close buffer (Ctrl+F4)" },
         { "<C-q>",  function() Snacks.bufdelete() end, mode = { "n", "i" }, desc = "Close buffer (Ctrl+Q)" },
       }
       if require("config.util").is_mac() then
