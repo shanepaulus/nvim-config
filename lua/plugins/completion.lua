@@ -102,6 +102,13 @@ return {
         experimental = { ghost_text = { hl_group = "CmpGhostText" } },
       })
 
+      -- No completion in Kubernetes manifests; other YAML keeps it.
+      cmp.setup.filetype("yaml", {
+        enabled = function()
+          return not require("config.util").is_k8s_manifest(0)
+        end,
+      })
+
       -- C#: re-issue the completion request until roslyn_ls catches up.
       --
       -- Immediately after a keystroke roslyn_ls answers with a STALE, truncated
